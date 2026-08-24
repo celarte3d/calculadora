@@ -878,6 +878,10 @@
       text-align: right;
     }
 
+    .print-desc {
+      display: none;
+    }
+
     .empty-state {
       padding: 36px 20px;
       text-align: center;
@@ -1299,6 +1303,21 @@
       .budget-table td {
         overflow: visible !important;
         white-space: nowrap !important;
+      }
+
+      .budget-table td:nth-child(2) {
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        vertical-align: top !important;
+      }
+      .budget-table td:nth-child(2) .edit-desc-input {
+        display: none !important;
+      }
+      .budget-table td:nth-child(2) .print-desc {
+        display: block !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
       }
     }
   </style>
@@ -1985,6 +2004,11 @@
     let item = budgetItems.find(i => i.id === id);
     if (item) {
       item.description = newDesc;
+      let row = document.querySelector(`[data-budget-item-id="${id}"]`);
+      let printDescription = row ? row.querySelector('.print-desc') : null;
+      if (printDescription) {
+        printDescription.textContent = newDesc;
+      }
     }
   }
 
@@ -2034,12 +2058,14 @@
       tbody.innerHTML = '';
       budgetItems.forEach((item) => {
         let tr = document.createElement('tr');
+        tr.dataset.budgetItemId = item.id;
         tr.innerHTML = `
           <td style="text-align: center;">
             <span class="budget-date-badge">${item.date || getTodayDateString()}</span>
           </td>
           <td>
             <input type="text" class="edit-desc-input" value="${item.description}" oninput="updateBudgetItemDesc(${item.id}, this.value)">
+            <span class="print-desc"></span>
           </td>
           <td style="text-align: center;">
             <input type="number" step="1" min="1" class="edit-qty-input" value="${item.quantity}" oninput="updateBudgetItemQty(${item.id}, this.value)">
@@ -2054,6 +2080,7 @@
             <button class="btn-danger-sm" onclick="removeFromBudget(${item.id})" title="Excluir item">✕</button>
           </td>
         `;
+        tr.querySelector('.print-desc').textContent = item.description;
         tbody.appendChild(tr);
       });
     } else {
