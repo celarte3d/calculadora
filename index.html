@@ -2178,7 +2178,7 @@
             <input type="number" step="1" min="1" class="edit-qty-input" value="${item.quantity}" oninput="updateBudgetItemQty(${item.id}, this.value)">
           </td>
           <td style="text-align: right;">
-            <input type="text" class="edit-price-input" value="${item.unitPrice.toFixed(2).replace('.', ',')}" onchange="updateBudgetItemPrice(${item.id}, this.value)">
+            <input type="text" class="edit-price-input" value="${item.unitPrice.toFixed(2).replace('.', ',')}" oninput="updateBudgetItemPrice(${item.id}, this.value)">
           </td>
           <td style="text-align: right;" id="itemMarkup_${item.id}">
             ${Number.isFinite(item.effectiveMarkup) ? item.effectiveMarkup.toFixed(2).replace('.', ',') + 'x' : '-'}
