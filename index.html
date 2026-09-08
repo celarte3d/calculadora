@@ -1947,6 +1947,12 @@
     let costRisk = baseRiskCost * riskPct;
 
     let unitCostTotal = baseRiskCost + costExtras + costRisk;
+    let projectTotalCost = unitCostTotal * qty;
+    if (preserveProjectTotal && projectTotalOverride !== null && projectTotalCost > 0) {
+      markup = projectTotalOverride / projectTotalCost;
+      document.getElementById('markup').value = markup.toFixed(2).replace('.', ',');
+    }
+
     let unitSellingPrice = unitCostTotal * markup;
     let unitProfit = unitSellingPrice - unitCostTotal;
 
@@ -1954,7 +1960,6 @@
 
     // Totals
     let calculatedProjectTotalPrice = unitSellingPrice * qty;
-    let projectTotalCost = unitCostTotal * qty;
     let projectTotalPrice = projectTotalOverride ?? calculatedProjectTotalPrice;
     let projectTotalProfit = projectTotalPrice - projectTotalCost;
 
