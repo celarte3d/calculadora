@@ -1877,7 +1877,7 @@
   function updateProjectTotal(value) {
     projectTotalOverride = parseMoneyValue(value);
     currentProjectTotalPrice = projectTotalOverride;
-    calculate();
+    calculate(true);
   }
 
   function formatProjectTotal(input) {
@@ -1919,7 +1919,9 @@
     document.getElementById('riskValue').innerText = val + '%';
   }
 
-  function calculate() {
+  function calculate(preserveProjectTotal = false) {
+    if (!preserveProjectTotal) projectTotalOverride = null;
+
     let qty = parseVal('quantity') || 1;
     let weightG = parseVal('weight');
     let printHours = parseTime('printTime');
