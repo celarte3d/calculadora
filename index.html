@@ -537,6 +537,18 @@
       letter-spacing: -1px;
     }
 
+    .total-card .price-input {
+      width: min(100%, 360px);
+      margin: 8px auto;
+      text-align: center;
+      font-size: 38px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -1px;
+      background: rgba(8, 13, 24, 0.7);
+      border-color: rgba(0, 229, 255, 0.25);
+    }
+
     .total-card .sub-metrics {
       display: flex;
       justify-content: center;
@@ -1484,7 +1496,9 @@
         <div class="panel">
           <div class="total-card">
             <div class="label">PROJETO TOTAL (UNITÁRIO × QTD)</div>
-            <div class="price" id="totalProjectPrice">R$ 0,00</div>
+            <input type="text" class="price-input" id="totalProjectPrice" value="0,00"
+              aria-label="Valor total do projeto" oninput="updateProjectTotal(this.value)"
+              onblur="formatProjectTotal(this)">
             <div class="sub-metrics">
               <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color: #10B981;">
@@ -1708,6 +1722,7 @@
   // State variables for Budget
   let budgetItems = [];
   let budgetTotalOverride = null;
+  let projectTotalOverride = null;
   let currentUnitSellingPrice = 0;
   let currentProjectTotalPrice = 0;
 
@@ -1859,6 +1874,18 @@
     input.value = fmtMoneyValue(budgetTotalOverride);
   }
 
+  function updateProjectTotal(value) {
+    projectTotalOverride = parseMoneyValue(value);
+    currentProjectTotalPrice = projectTotalOverride;
+    calculate();
+  }
+
+  function formatProjectTotal(input) {
+    projectTotalOverride = parseMoneyValue(input.value);
+    currentProjectTotalPrice = projectTotalOverride;
+    input.value = fmtMoneyValue(projectTotalOverride);
+  }
+
   function getTodayDateString() {
     const d = new Date();
     const day = String(d.getDate()).padStart(2, '0');
@@ -1924,14 +1951,16 @@
     currentUnitSellingPrice = unitSellingPrice;
 
     // Totals
-    let projectTotalPrice = unitSellingPrice * qty;
+    let calculatedProjectTotalPrice = unitSellingPrice * qty;
     let projectTotalCost = unitCostTotal * qty;
-    let projectTotalProfit = unitProfit * qty;
+    let projectTotalPrice = projectTotalOverride ?? calculatedProjectTotalPrice;
+    let projectTotalProfit = projectTotalPrice - projectTotalCost;
 
     currentProjectTotalPrice = projectTotalPrice;
 
     // Render Outputs
-    document.getElementById('totalProjectPrice').innerText = fmtR$(projectTotalPrice);
+    let projectTotalInput = document.getElementById('totalProjectPrice');
+    if (document.activeElement !== projectTotalInput) projectTotalInput.value = fmtMoneyValue(projectTotalPrice);
     document.getElementById('totalProfit').innerText = fmtR$(projectTotalProfit);
     document.getElementById('totalCost').innerText = fmtR$(projectTotalCost);
 
