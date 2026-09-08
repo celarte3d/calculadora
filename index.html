@@ -2196,6 +2196,10 @@
     } else {
       // Just update cell totals without rebuilding input DOM elements
       budgetItems.forEach((item) => {
+        let priceInput = document.querySelector(`[data-budget-item-id="${item.id}"] .edit-price-input`);
+        if (priceInput && document.activeElement !== priceInput) {
+          priceInput.value = fmtMoneyValue(item.unitPrice);
+        }
         let el = document.getElementById(`itemTotal_${item.id}`);
         if (el) {
           el.innerHTML = `<span class="budget-total-badge">${fmtMoneyValue(item.total)}</span>`;
