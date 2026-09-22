@@ -1962,7 +1962,7 @@
       document.getElementById('markup').value = markup.toFixed(2).replace('.', ',');
     }
 
-    let unitSellingPrice = (unitCostTotal - extCost) * markup + extCost;
+    let unitSellingPrice = (unitCostTotal - pkgCost - extCost) * markup + pkgCost + extCost;
     let unitProfit = unitSellingPrice - unitCostTotal;
 
     currentUnitSellingPrice = unitSellingPrice;
