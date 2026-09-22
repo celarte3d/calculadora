@@ -2284,7 +2284,7 @@
     alert(`Orçamento ${quoteNum} salvo com sucesso!`);
   }
 
-  function getBudgetWhatsAppData() {
+  function getBudgetPdfData() {
     if (budgetItems.length === 0) {
       return null;
     }
@@ -2293,27 +2293,12 @@
     let clientName = document.getElementById('clientName').value.trim() || 'Cliente Não Informado';
     let notes = document.getElementById('budgetNotes').value.trim();
     let grandTotal = budgetTotalOverride ?? budgetItems.reduce((acc, item) => acc + item.total, 0);
-    let message = [
-      '*ORÇAMENTO CELARTE 3D*',
-      `Nº: ${quoteNum}`,
-      `Cliente: ${clientName}`,
-      '',
-      '*Itens:*',
-      ...budgetItems.map(item => `- ${item.description} | Qtd: ${item.quantity} | Unit.: ${fmtR$(item.unitPrice)} | Total: ${fmtR$(item.total)}`),
-      '',
-      `*TOTAL: ${fmtR$(grandTotal)}*`
-    ];
-
-    if (notes) message.push('', `Observações: ${notes}`);
-
-    let fixedPhone = '553799398906';
-    let messageText = message.join('\n');
     return {
-      message: messageText,
-      url: `https://wa.me/${fixedPhone}?text=${encodeURIComponent(messageText)}`,
       quoteNum: quoteNum,
       clientName: clientName,
-      productName: budgetItems[0].description || 'Produto'
+      productName: budgetItems[0].description || 'Produto',
+      notes: notes,
+      grandTotal: grandTotal
     };
   }
 
@@ -2324,18 +2309,17 @@
       .trim() || 'Sem nome';
   }
 
-  function sendBudgetToWhatsApp() {
-    let data = getBudgetWhatsAppData();
-    if (!data) {
-      alert('Adicione pelo menos um produto antes de enviar o orçamento.');
-      return;
-    }
-
-    window.open(data.url, '_blank');
+  function escapePdfHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   async function printBudgetForWhatsApp() {
-    let data = getBudgetWhatsAppData();
+    let data = getBudgetPdfData();
     if (!data) {
       alert('Adicione pelo menos um produto antes de gerar o PDF.');
       return;
@@ -2343,29 +2327,47 @@
 
     if (typeof html2pdf === 'undefined') {
       window.print();
-      window.open(data.url, '_blank');
       return;
     }
 
-    let exportElement = document.getElementById('budgetPanel').cloneNode(true);
-    exportElement.querySelector('.budget-toolbar')?.remove();
-    exportElement.querySelectorAll('.btn-danger-sm').forEach(button => button.remove());
-    exportElement.querySelectorAll('input, textarea').forEach(control => {
-      let replacement = document.createElement('span');
-      replacement.textContent = control.value;
-      replacement.style.whiteSpace = 'pre-wrap';
-      replacement.style.color = '#111827';
-      control.replaceWith(replacement);
-    });
     let fileName = `Orçamento - ${sanitizePdfName(data.clientName)} - ${sanitizePdfName(data.productName)}.pdf`;
+    let itemsHtml = budgetItems.map(item => `
+      <tr>
+        <td>${escapePdfHtml(item.description)}</td>
+        <td style="text-align:center">${item.quantity}</td>
+        <td style="text-align:right">${fmtR$(item.unitPrice)}</td>
+        <td style="text-align:right">${fmtR$(item.total)}</td>
+      </tr>`).join('');
+    let exportElement = document.createElement('div');
+    exportElement.innerHTML = `
+      <div style="font-family:Arial,sans-serif;color:#111827;background:#ffffff;padding:28px;width:794px;min-height:1050px;">
+        <div style="border-bottom:2px solid #00a8c6;padding-bottom:14px;margin-bottom:22px;">
+          <div style="font-size:26px;font-weight:700;color:#0077b6;">CELARTE 3D</div>
+          <div style="font-size:13px;color:#64748b;margin-top:4px;">Orçamento de Impressão 3D</div>
+        </div>
+        <div style="font-size:14px;line-height:1.8;margin-bottom:24px;">
+          <div><strong>Orçamento:</strong> ${escapePdfHtml(data.quoteNum)}</div>
+          <div><strong>Cliente:</strong> ${escapePdfHtml(data.clientName)}</div>
+          <div><strong>Data:</strong> ${getTodayDateString()}</div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:#e6f7fa;text-align:left;">
+            <th style="padding:10px;border:1px solid #cbd5e1;">Produto</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:center;">Qtd</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right;">Valor unitário</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right;">Total</th>
+          </tr></thead>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+        <div style="text-align:right;font-size:20px;font-weight:700;margin-top:24px;padding-top:14px;border-top:2px solid #00a8c6;">TOTAL: ${fmtR$(data.grandTotal)}</div>
+        ${data.notes ? `<div style="margin-top:30px;font-size:13px;white-space:pre-wrap;"><strong>Observações:</strong><br>${escapePdfHtml(data.notes)}</div>` : ''}
+        <div style="margin-top:70px;text-align:center;font-size:12px;color:#64748b;">(37) 99939-8906 | celarte3d@gmail.com</div>
+      </div>`;
     exportElement.style.position = 'absolute';
     exportElement.style.left = '0';
     exportElement.style.top = '0';
     exportElement.style.width = '794px';
-    exportElement.style.padding = '24px';
-    exportElement.style.background = '#FFFFFF';
-    exportElement.style.color = '#111827';
-    exportElement.style.zIndex = '-1';
+    exportElement.style.zIndex = '9999';
     exportElement.style.pointerEvents = 'none';
     document.body.appendChild(exportElement);
 
@@ -2380,7 +2382,7 @@
       let file = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: 'Orçamento Celarte 3D', text: data.message, files: [file] });
+        await navigator.share({ title: fileName, files: [file] });
       } else {
         let downloadUrl = URL.createObjectURL(file);
         let downloadLink = document.createElement('a');
@@ -2388,12 +2390,10 @@
         downloadLink.download = file.name;
         downloadLink.click();
         URL.revokeObjectURL(downloadUrl);
-        window.open(data.url, '_blank');
-        alert('PDF gerado e baixado. Anexe o arquivo na conversa do WhatsApp que foi aberta.');
+        alert('PDF gerado e baixado. Anexe somente este arquivo no WhatsApp.');
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
-        window.open(data.url, '_blank');
         alert('Não foi possível gerar o PDF automaticamente. Use o botão Imprimir e escolha "Salvar como PDF".');
       }
     } finally {
