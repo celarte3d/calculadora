@@ -2311,8 +2311,17 @@
     return {
       message: messageText,
       url: `https://wa.me/${fixedPhone}?text=${encodeURIComponent(messageText)}`,
-      quoteNum: quoteNum
+      quoteNum: quoteNum,
+      clientName: clientName,
+      productName: budgetItems[0].description || 'Produto'
     };
+  }
+
+  function sanitizePdfName(value) {
+    return String(value || '')
+      .replace(/[\\/:*?"<>|]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim() || 'Sem nome';
   }
 
   function sendBudgetToWhatsApp() {
@@ -2348,24 +2357,27 @@
       replacement.style.color = '#111827';
       control.replaceWith(replacement);
     });
-    exportElement.style.position = 'fixed';
-    exportElement.style.left = '-10000px';
+    let fileName = `Orçamento - ${sanitizePdfName(data.clientName)} - ${sanitizePdfName(data.productName)}.pdf`;
+    exportElement.style.position = 'absolute';
+    exportElement.style.left = '0';
     exportElement.style.top = '0';
     exportElement.style.width = '794px';
     exportElement.style.padding = '24px';
     exportElement.style.background = '#FFFFFF';
     exportElement.style.color = '#111827';
+    exportElement.style.zIndex = '-1';
+    exportElement.style.pointerEvents = 'none';
     document.body.appendChild(exportElement);
 
     try {
       let pdfBlob = await html2pdf().set({
         margin: [8, 8, 8, 8],
-        filename: `Orcamento-${data.quoteNum.replace(/\s+/g, '-')}.pdf`,
+        filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, backgroundColor: '#FFFFFF', useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       }).from(exportElement).outputPdf('blob');
-      let file = new File([pdfBlob], `Orcamento-${data.quoteNum.replace(/\s+/g, '-')}.pdf`, { type: 'application/pdf' });
+      let file = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ title: 'Orçamento Celarte 3D', text: data.message, files: [file] });
