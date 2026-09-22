@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orçamento</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     :root {
       /* Palette based on Celarte 3D branding (Teal, Cyan, Gold Accent & Dark Navy) */
@@ -2283,10 +2284,9 @@
     alert(`Orçamento ${quoteNum} salvo com sucesso!`);
   }
 
-  function sendBudgetToWhatsApp() {
+  function getBudgetWhatsAppData() {
     if (budgetItems.length === 0) {
-      alert('Adicione pelo menos um produto antes de enviar o orçamento.');
-      return;
+      return null;
     }
 
     let quoteNum = document.getElementById('budgetNumberDisplay').innerText.trim();
@@ -2307,19 +2307,86 @@
     if (notes) message.push('', `Observações: ${notes}`);
 
     let fixedPhone = '553799398906';
-    let whatsappUrl = `https://wa.me/${fixedPhone}?text=${encodeURIComponent(message.join('\n'))}`;
-
-    window.open(whatsappUrl, '_blank');
+    let messageText = message.join('\n');
+    return {
+      message: messageText,
+      url: `https://wa.me/${fixedPhone}?text=${encodeURIComponent(messageText)}`,
+      quoteNum: quoteNum
+    };
   }
 
-  function printBudgetForWhatsApp() {
-    if (budgetItems.length === 0) {
+  function sendBudgetToWhatsApp() {
+    let data = getBudgetWhatsAppData();
+    if (!data) {
+      alert('Adicione pelo menos um produto antes de enviar o orçamento.');
+      return;
+    }
+
+    window.open(data.url, '_blank');
+  }
+
+  async function printBudgetForWhatsApp() {
+    let data = getBudgetWhatsAppData();
+    if (!data) {
       alert('Adicione pelo menos um produto antes de gerar o PDF.');
       return;
     }
 
-    window.print();
-    sendBudgetToWhatsApp();
+    if (typeof html2pdf === 'undefined') {
+      window.print();
+      window.open(data.url, '_blank');
+      return;
+    }
+
+    let exportElement = document.getElementById('budgetPanel').cloneNode(true);
+    exportElement.querySelector('.budget-toolbar')?.remove();
+    exportElement.querySelectorAll('.btn-danger-sm').forEach(button => button.remove());
+    exportElement.querySelectorAll('input, textarea').forEach(control => {
+      let replacement = document.createElement('span');
+      replacement.textContent = control.value;
+      replacement.style.whiteSpace = 'pre-wrap';
+      replacement.style.color = '#111827';
+      control.replaceWith(replacement);
+    });
+    exportElement.style.position = 'fixed';
+    exportElement.style.left = '-10000px';
+    exportElement.style.top = '0';
+    exportElement.style.width = '794px';
+    exportElement.style.padding = '24px';
+    exportElement.style.background = '#FFFFFF';
+    exportElement.style.color = '#111827';
+    document.body.appendChild(exportElement);
+
+    try {
+      let pdfBlob = await html2pdf().set({
+        margin: [8, 8, 8, 8],
+        filename: `Orcamento-${data.quoteNum.replace(/\s+/g, '-')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, backgroundColor: '#FFFFFF', useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(exportElement).outputPdf('blob');
+      let file = new File([pdfBlob], `Orcamento-${data.quoteNum.replace(/\s+/g, '-')}.pdf`, { type: 'application/pdf' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: 'Orçamento Celarte 3D', text: data.message, files: [file] });
+      } else {
+        let downloadUrl = URL.createObjectURL(file);
+        let downloadLink = document.createElement('a');
+        downloadLink.href = downloadUrl;
+        downloadLink.download = file.name;
+        downloadLink.click();
+        URL.revokeObjectURL(downloadUrl);
+        window.open(data.url, '_blank');
+        alert('PDF gerado e baixado. Anexe o arquivo na conversa do WhatsApp que foi aberta.');
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        window.open(data.url, '_blank');
+        alert('Não foi possível gerar o PDF automaticamente. Use o botão Imprimir e escolha "Salvar como PDF".');
+      }
+    } finally {
+      exportElement.remove();
+    }
   }
 
   function formatPhone(value) {
