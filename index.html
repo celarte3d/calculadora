@@ -2130,9 +2130,13 @@
       let priceNum = parseFloat(newPriceRaw.replace(',', '.')) || 0;
       item.unitPrice = priceNum;
       let discount = getWholesaleDiscount(item.quantity);
+      let baseUnitCost = Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
+        ? item.baseUnitCost
+        : item.unitPrice / (item.baseMarkup || 1);
       item.baseUnitPrice = discount < 1 ? priceNum / (1 - discount) : priceNum;
-      item.baseUnitCost = item.baseUnitPrice / (item.baseMarkup || 1);
-      item.effectiveMarkup = item.baseUnitCost > 0 ? priceNum / item.baseUnitCost : 1;
+      item.baseUnitCost = baseUnitCost;
+      item.baseMarkup = baseUnitCost > 0 ? item.baseUnitPrice / baseUnitCost : item.baseMarkup;
+      item.effectiveMarkup = baseUnitCost > 0 ? priceNum / baseUnitCost : 1;
       item.total = priceNum * item.quantity;
       renderBudgetTable(false); // Update totals without losing active edit focus
     }
