@@ -2330,7 +2330,7 @@
       return;
     }
 
-    let fileName = `Orçamento - ${sanitizePdfName(data.clientName)} - ${sanitizePdfName(data.productName)}.pdf`;
+    let fileName = `Orcamento - ${sanitizePdfName(data.clientName)} - ${sanitizePdfName(data.productName)}.pdf`;
     let itemsHtml = budgetItems.map(item => `
       <tr>
         <td>${escapePdfHtml(item.description)}</td>
@@ -2342,11 +2342,11 @@
     exportElement.innerHTML = `
       <div style="font-family:Arial,sans-serif;color:#111827;background:#ffffff;padding:28px;width:794px;min-height:1050px;">
         <div style="border-bottom:2px solid #00a8c6;padding-bottom:14px;margin-bottom:22px;">
-          <div style="font-size:26px;font-weight:700;color:#0077b6;">CELARTE 3D</div>
-          <div style="font-size:13px;color:#64748b;margin-top:4px;">Orçamento de Impressão 3D</div>
+          <img src="assets/logo-budget-panel.png" crossorigin="anonymous" style="height:62px;object-fit:contain;display:block;margin-bottom:8px;">
+          <div style="font-size:13px;color:#64748b;margin-top:4px;">Orcamento de Impressão 3D</div>
         </div>
         <div style="font-size:14px;line-height:1.8;margin-bottom:24px;">
-          <div><strong>Orçamento:</strong> ${escapePdfHtml(data.quoteNum)}</div>
+          <div><strong>Orcamento:</strong> ${escapePdfHtml(data.quoteNum)}</div>
           <div><strong>Cliente:</strong> ${escapePdfHtml(data.clientName)}</div>
           <div><strong>Data:</strong> ${getTodayDateString()}</div>
         </div>
@@ -2372,13 +2372,21 @@
     document.body.appendChild(exportElement);
 
     try {
-      let pdfBlob = await html2pdf().set({
+      await document.fonts?.ready;
+      await Promise.all(Array.from(exportElement.querySelectorAll('img')).map(image => image.complete
+        ? Promise.resolve()
+        : new Promise(resolve => { image.onload = resolve; image.onerror = resolve; })));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      let pdfWorker = html2pdf().set({
         margin: [8, 8, 8, 8],
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, backgroundColor: '#FFFFFF', useCORS: true },
+        html2canvas: { scale: 2, backgroundColor: '#FFFFFF', useCORS: true, logging: false },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      }).from(exportElement).outputPdf('blob');
+      }).from(exportElement).toCanvas().toPdf();
+      let pdf = await pdfWorker.get('pdf');
+      let pdfBlob = pdf.output('blob');
       let file = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
