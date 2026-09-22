@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orçamento</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       /* Palette based on Celarte 3D branding (Teal, Cyan, Gold Accent & Dark Navy) */
@@ -1626,7 +1625,6 @@
           </div>
         <div class="budget-toolbar">
           <button class="btn btn-primary" onclick="saveCurrentBudget()">💾 Salvar</button>
-          <button class="btn btn-secondary" style="border-color: #25D366; color: #25D366;" onclick="printBudgetForWhatsApp()">📄 PDF + WhatsApp</button>
           <button class="btn btn-secondary" onclick="openImportModal()">📂 Importar</button>
           <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
           <button class="btn btn-secondary" onclick="createNewBudget()" title="Novo Orçamento">✨ Novo</button>
@@ -2282,137 +2280,6 @@
 
     localStorage.setItem(STORAGE_QUOTES_KEY, JSON.stringify(saved));
     alert(`Orçamento ${quoteNum} salvo com sucesso!`);
-  }
-
-  function getBudgetPdfData() {
-    if (budgetItems.length === 0) {
-      return null;
-    }
-
-    let quoteNum = document.getElementById('budgetNumberDisplay').innerText.trim();
-    let clientName = document.getElementById('clientName').value.trim() || 'Cliente Não Informado';
-    let notes = document.getElementById('budgetNotes').value.trim();
-    let grandTotal = budgetTotalOverride ?? budgetItems.reduce((acc, item) => acc + item.total, 0);
-    return {
-      quoteNum: quoteNum,
-      clientName: clientName,
-      productName: budgetItems[0].description || 'Produto',
-      notes: notes,
-      grandTotal: grandTotal
-    };
-  }
-
-  function sanitizePdfName(value) {
-    return String(value || '')
-      .replace(/[\\/:*?"<>|]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim() || 'Sem nome';
-  }
-
-  function escapePdfHtml(value) {
-    return String(value || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  async function printBudgetForWhatsApp() {
-    let data = getBudgetPdfData();
-    if (!data) {
-      alert('Adicione pelo menos um produto antes de gerar o PDF.');
-      return;
-    }
-
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('Não foi possível carregar o gerador de PDF. Verifique sua conexão e tente novamente.');
-      return;
-    }
-
-    let fileName = `Orcamento - ${sanitizePdfName(data.clientName)} - ${sanitizePdfName(data.productName)}.pdf`;
-    try {
-      let pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-      let pageWidth = pdf.internal.pageSize.getWidth();
-      let margin = 16;
-      let contentWidth = pageWidth - margin * 2;
-      let y = 22;
-
-      pdf.setTextColor(0, 119, 182);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(22);
-      pdf.text('CELARTE 3D', margin, y);
-      y += 8;
-      pdf.setTextColor(80, 80, 80);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.text('Orcamento de Impressao 3D', margin, y);
-      y += 7;
-      pdf.setDrawColor(0, 168, 198);
-      pdf.setLineWidth(0.7);
-      pdf.line(margin, y, pageWidth - margin, y);
-      y += 12;
-
-      pdf.setTextColor(17, 24, 39);
-      pdf.setFontSize(11);
-      pdf.text(`Orcamento: ${data.quoteNum}`, margin, y);
-      y += 6;
-      pdf.text(`Cliente: ${data.clientName}`, margin, y);
-      y += 6;
-      pdf.text(`Data: ${getTodayDateString()}`, margin, y);
-      y += 12;
-
-      let columns = [margin, margin + 82, margin + 108, margin + 145];
-      let widths = [82, 26, 37, contentWidth - 145];
-      pdf.setFillColor(230, 247, 250);
-      pdf.rect(margin, y - 5, contentWidth, 9, 'F');
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Produto', columns[0] + 2, y);
-      pdf.text('Qtd', columns[1] + 2, y);
-      pdf.text('Valor unit.', columns[2] + 2, y);
-      pdf.text('Total', columns[3] + 2, y);
-      y += 8;
-      pdf.setFont('helvetica', 'normal');
-      budgetItems.forEach(item => {
-        let description = pdf.splitTextToSize(String(item.description || 'Produto'), widths[0] - 4);
-        let rowHeight = Math.max(7, description.length * 5);
-        if (y + rowHeight > 270) {
-          pdf.addPage();
-          y = 20;
-        }
-        pdf.setDrawColor(210, 220, 225);
-        pdf.rect(margin, y - 5, contentWidth, rowHeight);
-        pdf.text(description, columns[0] + 2, y);
-        pdf.text(String(item.quantity), columns[1] + 2, y);
-        pdf.text(fmtR$(item.unitPrice), columns[2] + 2, y);
-        pdf.text(fmtR$(item.total), columns[3] + 2, y);
-        y += rowHeight;
-      });
-
-      y += 10;
-      pdf.setDrawColor(0, 168, 198);
-      pdf.line(margin, y, pageWidth - margin, y);
-      y += 9;
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(15);
-      pdf.text(`TOTAL: ${fmtR$(data.grandTotal)}`, pageWidth - margin, y, { align: 'right' });
-      if (data.notes) {
-        y += 14;
-        pdf.setFontSize(10);
-        pdf.text('Observacoes:', margin, y);
-        y += 5;
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(pdf.splitTextToSize(data.notes, contentWidth), margin, y);
-      }
-      pdf.setFontSize(9);
-      pdf.setTextColor(100, 116, 139);
-      pdf.text('(37) 99939-8906 | celarte3d@gmail.com', pageWidth / 2, 285, { align: 'center' });
-
-      pdf.save(fileName);
-      window.open('https://web.whatsapp.com/send?phone=553799398906', '_blank');
-    } catch (error) {
-      alert('Não foi possível gerar o PDF. Verifique a conexão e tente novamente.');
-    }
   }
 
   function formatPhone(value) {
