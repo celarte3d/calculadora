@@ -1625,6 +1625,7 @@
           </div>
         <div class="budget-toolbar">
           <button class="btn btn-primary" onclick="saveCurrentBudget()">💾 Salvar</button>
+          <button class="btn btn-secondary" style="border-color: #25D366; color: #25D366;" onclick="sendBudgetToWhatsApp()">📱 WhatsApp</button>
           <button class="btn btn-secondary" onclick="openImportModal()">📂 Importar</button>
           <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
           <button class="btn btn-secondary" onclick="createNewBudget()" title="Novo Orçamento">✨ Novo</button>
@@ -2280,6 +2281,35 @@
 
     localStorage.setItem(STORAGE_QUOTES_KEY, JSON.stringify(saved));
     alert(`Orçamento ${quoteNum} salvo com sucesso!`);
+  }
+
+  function sendBudgetToWhatsApp() {
+    if (budgetItems.length === 0) {
+      alert('Adicione pelo menos um produto antes de enviar o orçamento.');
+      return;
+    }
+
+    let quoteNum = document.getElementById('budgetNumberDisplay').innerText.trim();
+    let clientName = document.getElementById('clientName').value.trim() || 'Cliente Não Informado';
+    let notes = document.getElementById('budgetNotes').value.trim();
+    let grandTotal = budgetTotalOverride ?? budgetItems.reduce((acc, item) => acc + item.total, 0);
+    let message = [
+      '*ORÇAMENTO CELARTE 3D*',
+      `Nº: ${quoteNum}`,
+      `Cliente: ${clientName}`,
+      '',
+      '*Itens:*',
+      ...budgetItems.map(item => `- ${item.description} | Qtd: ${item.quantity} | Unit.: ${fmtR$(item.unitPrice)} | Total: ${fmtR$(item.total)}`),
+      '',
+      `*TOTAL: ${fmtR$(grandTotal)}*`
+    ];
+
+    if (notes) message.push('', `Observações: ${notes}`);
+
+    let fixedPhone = '553799398906';
+    let whatsappUrl = `https://wa.me/${fixedPhone}?text=${encodeURIComponent(message.join('\n'))}`;
+
+    window.open(whatsappUrl, '_blank');
   }
 
   function formatPhone(value) {
