@@ -2138,6 +2138,27 @@
     }
   }
 
+  function updateBudgetItemMarkup(id, newMarkupRaw) {
+    let item = budgetItems.find(i => i.id === id);
+    if (item) {
+      let markupNum = parseFloat(newMarkupRaw.replace(',', '.'));
+      if (!Number.isFinite(markupNum) || markupNum <= 0) return;
+
+      let baseUnitCost = Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
+        ? item.baseUnitCost
+        : item.unitPrice / (item.baseMarkup || 1);
+      let discount = getWholesaleDiscount(item.quantity);
+
+      item.baseUnitCost = baseUnitCost;
+      item.unitPrice = baseUnitCost * markupNum;
+      item.baseUnitPrice = discount < 1 ? item.unitPrice / (1 - discount) : item.unitPrice;
+      item.baseMarkup = baseUnitCost > 0 ? item.baseUnitPrice / baseUnitCost : markupNum;
+      item.effectiveMarkup = markupNum;
+      item.total = item.unitPrice * item.quantity;
+      renderBudgetTable(false); // Update totals without losing active edit focus
+    }
+  }
+
   function removeFromBudget(id) {
     budgetItems = budgetItems.filter(item => item.id !== id);
     renderBudgetTable();
@@ -2180,8 +2201,8 @@
           <td style="text-align: right;">
             <input type="text" class="edit-price-input" value="${item.unitPrice.toFixed(2).replace('.', ',')}" oninput="updateBudgetItemPrice(${item.id}, this.value)">
           </td>
-          <td style="text-align: right;" id="itemMarkup_${item.id}">
-            ${Number.isFinite(item.effectiveMarkup) ? item.effectiveMarkup.toFixed(2).replace('.', ',') + 'x' : '-'}
+          <td style="text-align: right;">
+            <input type="text" class="edit-markup-input" value="${Number.isFinite(item.effectiveMarkup) ? item.effectiveMarkup.toFixed(2).replace('.', ',') : ''}" oninput="updateBudgetItemMarkup(${item.id}, this.value)">
           </td>
           <td style="text-align: right;" id="itemTotal_${item.id}">
             <span class="budget-total-badge">${fmtMoneyValue(item.total)}</span>
@@ -2204,11 +2225,11 @@
         if (el) {
           el.innerHTML = `<span class="budget-total-badge">${fmtMoneyValue(item.total)}</span>`;
         }
-        let markupEl = document.getElementById(`itemMarkup_${item.id}`);
-        if (markupEl) {
-          markupEl.textContent = Number.isFinite(item.effectiveMarkup)
-            ? item.effectiveMarkup.toFixed(2).replace('.', ',') + 'x'
-            : '-';
+        let markupInput = document.querySelector(`[data-budget-item-id="${item.id}"] .edit-markup-input`);
+        if (markupInput && document.activeElement !== markupInput) {
+          markupInput.value = Number.isFinite(item.effectiveMarkup)
+            ? item.effectiveMarkup.toFixed(2).replace('.', ',')
+            : '';
         }
       });
     }
