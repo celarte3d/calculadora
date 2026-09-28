@@ -1461,13 +1461,13 @@
 
           <div class="form-group">
             <label>MARKUP DESEJADO (MULTIPLICADOR)</label>
-            <input type="text" id="markup" value="2,0" oninput="calculate()">
+            <input type="text" id="markup" value="2,00" oninput="calculate()">
           </div>
 
           <!-- LUCRO REAL (%) INDICATOR & MINIMUM 100% WARNING -->
           <div class="profit-gauge-wrapper">
             <div class="profit-gauge-header">
-              <span class="label">LUCRO REAL (% SOBRE CUSTO)</span>
+              <span class="label">LUCRO REAL (% SOBRE CUSTO DE PRODUÇÃO)</span>
               <span class="profit-gauge-value" id="realProfitValue">100.0%</span>
             </div>
             <div class="profit-gauge-track">
@@ -1734,6 +1734,7 @@
   let projectTotalOverride = null;
   let currentUnitSellingPrice = 0;
   let currentProjectTotalPrice = 0;
+  let currentUnitCostTotal = 0;
 
   // LocalStorage keys
   const STORAGE_QUOTES_KEY = 'celarte_saved_quotes';
@@ -1863,6 +1864,10 @@
     return 'R$ ' + val.toFixed(2).replace('.', ',');
   }
 
+  function roundMoneyValue(value) {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
   function fmtMoneyValue(val) {
     return val.toFixed(2).replace('.', ',');
   }
@@ -1956,16 +1961,18 @@
     let costRisk = baseRiskCost * riskPct;
 
     let unitCostTotal = baseRiskCost + costExtras + costRisk;
+    let unitProductionCost = unitCostTotal - costExtras;
     let projectTotalCost = unitCostTotal * qty;
-    if (preserveProjectTotal && projectTotalOverride !== null && projectTotalCost > 0) {
-      markup = projectTotalOverride / projectTotalCost;
+    if (preserveProjectTotal && projectTotalOverride !== null && unitProductionCost > 0) {
+      markup = (projectTotalOverride / qty - costExtras) / unitProductionCost;
       document.getElementById('markup').value = markup.toFixed(2).replace('.', ',');
     }
 
-    let unitSellingPrice = (unitCostTotal - pkgCost - extCost) * markup + pkgCost + extCost;
+    let unitSellingPrice = roundMoneyValue(unitProductionCost * markup) + costExtras;
     let unitProfit = unitSellingPrice - unitCostTotal;
 
     currentUnitSellingPrice = unitSellingPrice;
+    currentUnitCostTotal = unitCostTotal;
 
     // Totals
     let calculatedProjectTotalPrice = unitSellingPrice * qty;
@@ -2053,20 +2060,23 @@
     let name = document.getElementById('projectName').value.trim() || 'Item 3D';
     let qty = parseVal('quantity') || 1;
     let unitPrice = currentUnitSellingPrice;
+    let effectiveMarkup = currentUnitCostTotal > 0 ? unitPrice / currentUnitCostTotal : 1;
     let total = unitPrice * qty;
 
-    budgetItems.push({
+    let item = {
       id: Date.now(),
       description: name,
       quantity: qty,
       unitPrice: unitPrice,
       total: total,
       baseUnitPrice: unitPrice,
-      baseMarkup: markup,
-      baseUnitCost: unitPrice / markup,
-      effectiveMarkup: markup,
+      baseMarkup: effectiveMarkup,
+      baseUnitCost: currentUnitCostTotal,
+      effectiveMarkup: effectiveMarkup,
       date: getTodayDateString()
-    });
+    };
+    applyWholesalePricing(item, qty);
+    budgetItems.push(item);
 
     renderBudgetTable();
 
@@ -2079,10 +2089,10 @@
   }
 
   function getWholesaleDiscount(quantity) {
-    if (quantity >= 100) return 0.38;
+    if (quantity >= 100) return 0.40;
     if (quantity >= 50) return 0.30;
-    if (quantity >= 30) return 0.22;
-    if (quantity >= 10) return 0.12;
+    if (quantity >= 30) return 0.20;
+    if (quantity >= 10) return 0.10;
     return 0;
   }
 
@@ -2097,7 +2107,7 @@
     item.baseUnitPrice = baseUnitPrice;
     item.baseMarkup = baseMarkup;
     item.baseUnitCost = baseUnitCost;
-    item.unitPrice = baseUnitPrice * (1 - discount);
+    item.unitPrice = roundMoneyValue(baseUnitPrice * (1 - discount));
     item.effectiveMarkup = baseUnitCost > 0 ? item.unitPrice / baseUnitCost : 1;
     item.total = item.unitPrice * quantity;
   }
@@ -2127,7 +2137,7 @@
   function updateBudgetItemPrice(id, newPriceRaw) {
     let item = budgetItems.find(i => i.id === id);
     if (item) {
-      let priceNum = parseFloat(newPriceRaw.replace(',', '.')) || 0;
+      let priceNum = roundMoneyValue(parseFloat(newPriceRaw.replace(',', '.')) || 0);
       item.unitPrice = priceNum;
       let discount = getWholesaleDiscount(item.quantity);
       let baseUnitCost = Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
@@ -2154,7 +2164,7 @@
       let discount = getWholesaleDiscount(item.quantity);
 
       item.baseUnitCost = baseUnitCost;
-      item.unitPrice = baseUnitCost * markupNum;
+      item.unitPrice = roundMoneyValue(baseUnitCost * markupNum);
       item.baseUnitPrice = discount < 1 ? item.unitPrice / (1 - discount) : item.unitPrice;
       item.baseMarkup = baseUnitCost > 0 ? item.baseUnitPrice / baseUnitCost : markupNum;
       item.effectiveMarkup = markupNum;
