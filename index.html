@@ -1735,6 +1735,8 @@
   let currentUnitSellingPrice = 0;
   let currentProjectTotalPrice = 0;
   let currentUnitCostTotal = 0;
+  let currentUnitProductionCost = 0;
+  let currentUnitExtrasCost = 0;
 
   // LocalStorage keys
   const STORAGE_QUOTES_KEY = 'celarte_saved_quotes';
@@ -1973,6 +1975,8 @@
 
     currentUnitSellingPrice = unitSellingPrice;
     currentUnitCostTotal = unitCostTotal;
+    currentUnitProductionCost = unitProductionCost;
+    currentUnitExtrasCost = costExtras;
 
     // Totals
     let calculatedProjectTotalPrice = unitSellingPrice * qty;
@@ -2060,7 +2064,9 @@
     let name = document.getElementById('projectName').value.trim() || 'Item 3D';
     let qty = parseVal('quantity') || 1;
     let unitPrice = currentUnitSellingPrice;
-    let effectiveMarkup = currentUnitCostTotal > 0 ? unitPrice / currentUnitCostTotal : 1;
+    let effectiveMarkup = currentUnitProductionCost > 0
+      ? (unitPrice - currentUnitExtrasCost) / currentUnitProductionCost
+      : 1;
     let total = unitPrice * qty;
 
     let item = {
@@ -2072,6 +2078,8 @@
       baseUnitPrice: unitPrice,
       baseMarkup: effectiveMarkup,
       baseUnitCost: currentUnitCostTotal,
+      baseProductionCost: currentUnitProductionCost,
+      unitExtrasCost: currentUnitExtrasCost,
       effectiveMarkup: effectiveMarkup,
       date: getTodayDateString()
     };
@@ -2100,15 +2108,21 @@
     let discount = getWholesaleDiscount(quantity);
     let baseUnitPrice = Number.isFinite(item.baseUnitPrice) ? item.baseUnitPrice : item.unitPrice;
     let baseMarkup = Number.isFinite(item.baseMarkup) && item.baseMarkup > 0 ? item.baseMarkup : 1;
-    let baseUnitCost = Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
+    let baseProductionCost = Number.isFinite(item.baseProductionCost) && item.baseProductionCost >= 0
+      ? item.baseProductionCost
+      : Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
       ? item.baseUnitCost
       : baseUnitPrice / baseMarkup;
+    let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
 
     item.baseUnitPrice = baseUnitPrice;
     item.baseMarkup = baseMarkup;
-    item.baseUnitCost = baseUnitCost;
+    item.baseProductionCost = baseProductionCost;
+    item.unitExtrasCost = unitExtrasCost;
     item.unitPrice = roundMoneyValue(baseUnitPrice * (1 - discount));
-    item.effectiveMarkup = baseUnitCost > 0 ? item.unitPrice / baseUnitCost : 1;
+    item.effectiveMarkup = baseProductionCost > 0
+      ? (item.unitPrice - unitExtrasCost) / baseProductionCost
+      : 1;
     item.total = item.unitPrice * quantity;
   }
 
@@ -2140,13 +2154,21 @@
       let priceNum = roundMoneyValue(parseFloat(newPriceRaw.replace(',', '.')) || 0);
       item.unitPrice = priceNum;
       let discount = getWholesaleDiscount(item.quantity);
-      let baseUnitCost = Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
-        ? item.baseUnitCost
+      let baseProductionCost = Number.isFinite(item.baseProductionCost) && item.baseProductionCost >= 0
+        ? item.baseProductionCost
+        : Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
+          ? item.baseUnitCost
         : item.unitPrice / (item.baseMarkup || 1);
+      let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
       item.baseUnitPrice = discount < 1 ? priceNum / (1 - discount) : priceNum;
-      item.baseUnitCost = baseUnitCost;
-      item.baseMarkup = baseUnitCost > 0 ? item.baseUnitPrice / baseUnitCost : item.baseMarkup;
-      item.effectiveMarkup = baseUnitCost > 0 ? priceNum / baseUnitCost : 1;
+      item.baseProductionCost = baseProductionCost;
+      item.unitExtrasCost = unitExtrasCost;
+      item.baseMarkup = baseProductionCost > 0
+        ? (item.baseUnitPrice - unitExtrasCost) / baseProductionCost
+        : item.baseMarkup;
+      item.effectiveMarkup = baseProductionCost > 0
+        ? (priceNum - unitExtrasCost) / baseProductionCost
+        : 1;
       item.total = priceNum * item.quantity;
       renderBudgetTable(false); // Update totals without losing active edit focus
     }
@@ -2158,16 +2180,22 @@
       let markupNum = parseFloat(newMarkupRaw.replace(',', '.'));
       if (!Number.isFinite(markupNum) || markupNum <= 0) return;
 
-      let baseUnitCost = Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
-        ? item.baseUnitCost
+      let baseProductionCost = Number.isFinite(item.baseProductionCost) && item.baseProductionCost >= 0
+        ? item.baseProductionCost
+        : Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
+          ? item.baseUnitCost
         : item.unitPrice / (item.baseMarkup || 1);
+      let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
       let discount = getWholesaleDiscount(item.quantity);
 
-      item.baseUnitCost = baseUnitCost;
-      item.unitPrice = roundMoneyValue(baseUnitCost * markupNum);
-      item.baseUnitPrice = discount < 1 ? item.unitPrice / (1 - discount) : item.unitPrice;
-      item.baseMarkup = baseUnitCost > 0 ? item.baseUnitPrice / baseUnitCost : markupNum;
-      item.effectiveMarkup = markupNum;
+      item.baseProductionCost = baseProductionCost;
+      item.unitExtrasCost = unitExtrasCost;
+      item.baseUnitPrice = roundMoneyValue(baseProductionCost * markupNum) + unitExtrasCost;
+      item.unitPrice = roundMoneyValue(item.baseUnitPrice * (1 - discount));
+      item.baseMarkup = markupNum;
+      item.effectiveMarkup = baseProductionCost > 0
+        ? (item.unitPrice - unitExtrasCost) / baseProductionCost
+        : 1;
       item.total = item.unitPrice * item.quantity;
       renderBudgetTable(false); // Update totals without losing active edit focus
     }
@@ -2216,7 +2244,7 @@
             <input type="text" class="edit-price-input" value="${item.unitPrice.toFixed(2).replace('.', ',')}" oninput="updateBudgetItemPrice(${item.id}, this.value)">
           </td>
           <td style="text-align: right;">
-            <input type="text" class="edit-markup-input" value="${Number.isFinite(item.effectiveMarkup) ? item.effectiveMarkup.toFixed(2).replace('.', ',') : ''}" oninput="updateBudgetItemMarkup(${item.id}, this.value)">
+            <input type="text" class="edit-markup-input" value="${Number.isFinite(item.effectiveMarkup) ? item.effectiveMarkup.toFixed(2).replace('.', ',') : ''}" oninput="updateBudgetItemMarkup(${item.id}, this.value)" onblur="renderBudgetTable(false)">
           </td>
           <td style="text-align: right;" id="itemTotal_${item.id}">
             <span class="budget-total-badge">${fmtMoneyValue(item.total)}</span>
