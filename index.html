@@ -77,6 +77,51 @@
             background: linear-gradient(145deg, rgba(39, 34, 63, 0.96), rgba(16, 22, 42, 0.97)) !important;
             border-color: rgba(213, 54, 126, 0.28) !important;
             box-shadow: 0 12px 26px rgba(10, 5, 22, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            padding: 0.65rem !important;
+        }
+
+        .premium-card .card-client {
+            color: #c4b5fd;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .premium-card .card-title {
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        .premium-card .card-quote,
+        .premium-card .card-production-order {
+            font-size: 0.75rem;
+        }
+
+        .premium-card .card-summary {
+            font-size: 0.8125rem;
+        }
+
+        .card-production-progress {
+            height: 0.375rem;
+            overflow: hidden;
+            border-radius: 9999px;
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .card-production-progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #8f4ec6, #d5367e);
+            transition: width 180ms ease;
+        }
+
+        #order-form label {
+            font-size: 0.875rem;
+        }
+
+        #order-form input,
+        #order-form select,
+        #order-form textarea {
+            font-size: 0.9375rem;
         }
 
         .premium-card::before {
@@ -304,12 +349,12 @@
                         </button>
                     </div>
                     <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
-                        <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Em Produção</span>
-                        <span id="stat-producao" class="text-base font-bold text-pink-300">0</span>
-                    </div>
-                    <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
                         <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Em Orçamento</span>
                         <span id="stat-orcamento" class="text-base font-bold text-violet-300">R$ 0,00</span>
+                    </div>
+                    <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
+                        <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Aprovados (Valor)</span>
+                        <span id="stat-aprovados-valor" class="text-base font-bold text-pink-300">R$ 0,00</span>
                     </div>
                     <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
                         <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Caixa Real (Recebido)</span>
@@ -375,7 +420,7 @@
             <!-- Modal Form Body -->
             <form id="order-form" onsubmit="saveCard(event)" class="p-4 space-y-4 overflow-y-auto custom-scrollbar flex-1">
                 <input type="hidden" id="card-id">
-
+                
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Nome do Cliente *</label>
@@ -387,26 +432,23 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Nome da Peça / Projeto *</label>
-                    <input type="text" id="field-title" required placeholder="Ex: Suporte para Headset V2" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                </div>
+                <section class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="mb-2 flex items-center justify-between gap-2">
+                        <h4 class="font-semibold text-slate-200">Produtos do pedido</h4>
+                        <button type="button" onclick="addOrderItemRow()" class="rounded-lg border border-fuchsia-300/30 px-2.5 py-1.5 text-xs font-semibold text-fuchsia-200 hover:bg-fuchsia-500/10">
+                            <i class="fa-solid fa-plus mr-1"></i>Adicionar produto
+                        </button>
+                    </div>
+                    <p class="mb-2 text-xs text-slate-400">Desmarque os produtos que o cliente não aprovou; o valor e a quantidade serão atualizados.</p>
+                    <div id="field-items-list" class="space-y-2"></div>
+                    <p id="field-items-summary" class="mt-2 text-right text-sm font-semibold text-fuchsia-200"></p>
+                </section>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Quantidade</label>
-                        <input type="number" id="field-quantity" min="1" value="1" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Valor Unitário (R$)</label>
-                        <input type="number" step="0.01" min="0" id="field-price" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                    </div>
-                    <div class="col-span-2 sm:col-span-1">
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Coluna / Etapa</label>
-                        <select id="field-column" onchange="updatePaymentStatusVisibility()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                            <!-- Opções dinâmicas -->
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Coluna / Etapa</label>
+                    <select id="field-column" onchange="updatePaymentStatusVisibility()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
+                        <!-- Opções dinâmicas -->
+                    </select>
                 </div>
 
                 <!-- Datas de Criação e Entrega -->
@@ -418,10 +460,10 @@
                         <input type="date" id="field-created-date" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none" readonly>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-amber-400 mb-1">
-                            <i class="fa-solid fa-calendar-check mr-1"></i> Data de Entrega *
+                        <label id="field-due-date-label" class="block text-xs font-semibold text-amber-400 mb-1">
+                            <i class="fa-solid fa-calendar-check mr-1"></i> Data de Entrega
                         </label>
-                        <input type="date" id="field-due-date" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
+                        <input type="date" id="field-due-date" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
                     </div>
                 </div>
 
@@ -454,8 +496,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Observações / Especificações Técnicas</label>
-                    <textarea id="field-notes" rows="2" placeholder="Ex: Material PLA Preto, 20% Infill, Altura de camada 0.2mm..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"></textarea>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Observações</label>
+                    <textarea id="field-notes" rows="2" placeholder="Anotações opcionais sobre o pedido..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"></textarea>
                 </div>
 
                 <div class="pt-2 flex justify-end gap-2">
@@ -578,13 +620,6 @@
             const quoteTotal = Number.isFinite(Number(quote.total)) && Number(quote.total) >= 0
                 ? Number(quote.total)
                 : totalFromItems;
-            const productSummary = items.length === 1
-                ? items[0].description
-                : `${items[0].description} + ${items.length - 1} ${items.length === 2 ? 'item' : 'itens'}`;
-            const itemDetails = items.map(item =>
-                `${item.description} — ${item.quantity}x R$ ${item.unitPrice.toFixed(2)} (R$ ${item.total.toFixed(2)})`
-            );
-            const notes = [quote.notes, ...itemDetails].filter(value => typeof value === 'string' && value.trim()).join('\n');
 
             const existingIndex = cards.findIndex(card => card.quoteNumber
                 && String(card.quoteNumber).trim().toLocaleUpperCase('pt-BR') === quoteKey);
@@ -593,21 +628,35 @@
                 : -1;
             const cardIndex = existingIndex !== -1 ? existingIndex : legacyIndex;
             const existingCard = cardIndex !== -1 ? cards[cardIndex] : null;
+            const existingItems = existingCard ? normalizeOrderItems(existingCard) : [];
+            const savedItems = items.map((item, index) => {
+                const matchingItem = existingItems[index]?.description === item.description
+                    ? existingItems[index]
+                    : existingItems.find(existingItem => existingItem.description === item.description);
+                return {
+                    ...item,
+                    completed: matchingItem?.completed || false,
+                    included: matchingItem?.included !== false
+                };
+            });
+            const allItemsIncluded = savedItems.every(item => item.included);
             const quoteCard = {
                 id: existingCard ? existingCard.id : quoteId,
                 quoteNumber,
                 client: typeof quote.clientName === 'string' && quote.clientName.trim() ? quote.clientName.trim() : 'Cliente Não Informado',
                 phone: typeof quote.clientPhone === 'string' ? quote.clientPhone.trim() : '',
-                title: productSummary,
+                title: getProductSummary(savedItems),
                 qty: 1,
-                price: quoteTotal,
+                price: allItemsIncluded ? quoteTotal : getIncludedItemTotal(savedItems),
+                items: savedItems,
                 column: existingCard && !QUOTE_COLUMNS.includes(existingCard.column)
                     ? existingCard.column
                     : 'orc_enviados',
                 paymentStatus: existingCard ? existingCard.paymentStatus || 'pending' : 'pending',
-                notes,
+                notes: existingCard ? existingCard.notes || '' : '',
                 createdDate: existingCard ? existingCard.createdDate : formatDateToISO(new Date()),
-                dueDate: existingCard ? existingCard.dueDate : ''
+                dueDate: existingCard ? existingCard.dueDate : '',
+                productionOrder: existingCard ? existingCard.productionOrder : undefined
             };
 
             if (cardIndex === -1) cards.push(quoteCard);
@@ -638,6 +687,9 @@
             } else {
                 cards = [];
             }
+            if (ensureProductionOrders()) {
+                localStorage.setItem(KANBAN_CARDS_STORAGE_KEY, JSON.stringify(cards));
+            }
         }
 
         // SALVAR DADOS NO LOCALSTORAGE
@@ -656,6 +708,183 @@
             const parts = dateStr.split('-');
             if (parts.length === 3) return `${parts[2]}/${parts[1]}`;
             return dateStr;
+        }
+
+        function normalizeOrderItems(card) {
+            if (Array.isArray(card.items) && card.items.length) {
+                return card.items.map(item => {
+                    const quantity = Number.isFinite(Number(item.quantity)) && Number(item.quantity) > 0 ? Number(item.quantity) : 1;
+                    const unitPrice = Number.isFinite(Number(item.unitPrice)) && Number(item.unitPrice) >= 0 ? Number(item.unitPrice) : 0;
+                    return {
+                        description: String(item.description || '').trim(),
+                        quantity,
+                        unitPrice,
+                        total: Number.isFinite(Number(item.total)) && Number(item.total) >= 0 ? Number(item.total) : quantity * unitPrice,
+                        completed: Boolean(item.completed),
+                        included: item.included !== false
+                    };
+                }).filter(item => item.description);
+            }
+
+            if (!card.title) return [];
+            const quantity = Number.isFinite(Number(card.qty)) && Number(card.qty) > 0 ? Number(card.qty) : 1;
+            const unitPrice = Number.isFinite(Number(card.price)) && Number(card.price) >= 0 ? Number(card.price) : 0;
+            return [{
+                description: String(card.title),
+                quantity,
+                unitPrice,
+                total: quantity * unitPrice,
+                completed: false,
+                included: true
+            }];
+        }
+
+        function getProductSummary(items) {
+            const includedItems = items.filter(item => item.included !== false);
+            if (!includedItems.length) return 'Nenhum item incluído';
+            return includedItems.length === 1
+                ? includedItems[0].description
+                : `${includedItems[0].description} + ${includedItems.length - 1} ${includedItems.length === 2 ? 'item' : 'itens'}`;
+        }
+
+        function getIncludedItemQuantity(items) {
+            return items.reduce((sum, item) => sum + (item.included !== false ? item.quantity : 0), 0);
+        }
+
+        function getIncludedItemTotal(items) {
+            return items.reduce((sum, item) => sum + (item.included !== false ? item.total : 0), 0);
+        }
+
+        function updateOrderItemsSummary() {
+            const items = readOrderItems();
+            const quantity = getIncludedItemQuantity(items);
+            const total = getIncludedItemTotal(items);
+            const summary = document.getElementById('field-items-summary');
+            if (summary) {
+                summary.textContent = `${quantity} unidade${quantity === 1 ? '' : 's'} incluída${quantity === 1 ? '' : 's'} · ${new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(total)}`;
+            }
+        }
+
+        function isProductionColumn(columnId) {
+            return columnId === 'fila_producao' || columnId === 'em_producao';
+        }
+
+        function requiresDueDate(columnId) {
+            return columnId !== 'cancelados'
+                && COLUMNS.findIndex(column => column.id === columnId) >= COLUMNS.findIndex(column => column.id === 'aprovados');
+        }
+
+        function getNextProductionOrder() {
+            return cards.reduce((highest, card) => Math.max(highest, Number(card.productionOrder) || 0), 0) + 1;
+        }
+
+        function ensureProductionOrders() {
+            const missingOrderCards = cards.filter(card => isProductionColumn(card.column) && !(Number(card.productionOrder) > 0));
+            missingOrderCards.forEach(card => {
+                card.productionOrder = getNextProductionOrder();
+            });
+            return missingOrderCards.length > 0;
+        }
+
+        function readOrderItems() {
+            return Array.from(document.querySelectorAll('#field-items-list [data-order-item-row]')).map(row => {
+                const quantity = Number(row.querySelector('[data-item-quantity]').value);
+                const unitPrice = Number(row.querySelector('[data-item-price]').value);
+                return {
+                    description: row.querySelector('[data-item-description]').value.trim(),
+                    quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+                    unitPrice: Number.isFinite(unitPrice) && unitPrice >= 0 ? unitPrice : 0,
+                    total: (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
+                        * (Number.isFinite(unitPrice) && unitPrice >= 0 ? unitPrice : 0),
+                    completed: row.querySelector('[data-item-completed]').checked,
+                    included: row.querySelector('[data-item-included]').checked
+                };
+            }).filter(item => item.description);
+        }
+
+        function addOrderItemRow(item = {}) {
+            const row = document.createElement('div');
+            row.dataset.orderItemRow = 'true';
+            row.className = 'grid grid-cols-12 gap-2 rounded-lg border border-slate-800 bg-slate-900/70 p-2';
+            row.innerHTML = `
+                <div class="col-span-12">
+                    <label class="mb-1 block font-medium text-slate-300">Produto / peça *</label>
+                    <input data-item-description type="text" required placeholder="Ex: Suporte para Headset V2" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-fuchsia-400 focus:outline-none">
+                </div>
+                <div class="col-span-3">
+                    <label class="mb-1 block font-medium text-slate-300">Quantidade</label>
+                    <input data-item-quantity type="number" min="1" step="1" required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-fuchsia-400 focus:outline-none">
+                </div>
+                <div class="col-span-4">
+                    <label class="mb-1 block font-medium text-slate-300">Valor unitário (R$)</label>
+                    <input data-item-price type="number" min="0" step="0.01" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-fuchsia-400 focus:outline-none">
+                </div>
+                <label class="col-span-3 flex cursor-pointer flex-col items-center justify-center gap-1 text-center font-medium text-amber-200">
+                    <input data-item-included type="checkbox" class="h-4 w-4 accent-fuchsia-500">
+                    <span data-inclusion-label class="text-xs">Aprovado</span>
+                </label>
+                <label class="col-span-2 flex cursor-pointer flex-col items-center justify-center gap-1 text-center font-medium text-emerald-300">
+                    <input data-item-completed type="checkbox" class="h-4 w-4 accent-emerald-500">
+                    <span class="text-xs">Pronto</span>
+                </label>
+                <button type="button" data-remove-item class="col-span-1 self-center rounded-lg p-2 text-rose-300 hover:bg-rose-500/10" title="Remover produto" aria-label="Remover produto">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <div class="col-span-12 text-right text-xs text-slate-300">
+                    Total do produto: <strong data-item-total class="text-slate-100"></strong>
+                </div>
+            `;
+            row.querySelector('[data-item-description]').value = item.description || '';
+            row.querySelector('[data-item-quantity]').value = item.quantity || 1;
+            row.querySelector('[data-item-price]').value = Number.isFinite(Number(item.unitPrice)) ? item.unitPrice : '';
+            row.querySelector('[data-item-completed]').checked = Boolean(item.completed);
+            row.querySelector('[data-item-included]').checked = item.included !== false;
+            const updateItemInclusionState = () => {
+                const included = row.querySelector('[data-item-included]').checked;
+                row.classList.toggle('opacity-60', !included);
+                row.querySelector('[data-inclusion-label]').textContent = included ? 'Aprovado' : 'Não aprovado';
+                updateOrderItemsSummary();
+            };
+            const updateItemTotal = () => {
+                const quantity = Number(row.querySelector('[data-item-quantity]').value) || 0;
+                const unitPrice = Number(row.querySelector('[data-item-price]').value) || 0;
+                row.querySelector('[data-item-total]').textContent = new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(quantity * unitPrice);
+                updateItemInclusionState();
+            };
+            row.querySelector('[data-item-quantity]').addEventListener('input', updateItemTotal);
+            row.querySelector('[data-item-price]').addEventListener('input', updateItemTotal);
+            row.querySelector('[data-item-included]').addEventListener('change', updateItemTotal);
+            updateItemTotal();
+            row.querySelector('[data-remove-item]').addEventListener('click', () => {
+                const list = document.getElementById('field-items-list');
+                if (list.querySelectorAll('[data-order-item-row]').length === 1) {
+                    row.querySelector('[data-item-description]').value = '';
+                    row.querySelector('[data-item-quantity]').value = '1';
+                    row.querySelector('[data-item-price]').value = '';
+                    row.querySelector('[data-item-completed]').checked = false;
+                    row.querySelector('[data-item-included]').checked = true;
+                    updateItemTotal();
+                    return;
+                }
+                row.remove();
+                updateOrderItemsSummary();
+            });
+            document.getElementById('field-items-list').appendChild(row);
+            updateOrderItemsSummary();
+            return row;
+        }
+
+        function renderOrderItems(items) {
+            const list = document.getElementById('field-items-list');
+            list.replaceChildren();
+            (items.length ? items : [{}]).forEach(item => addOrderItemRow(item));
+            updateOrderItemsSummary();
         }
 
         // POPULAR COMBOBOX DE COLUNAS NO MODAL
@@ -715,15 +944,21 @@
             const board = document.getElementById('kanban-board');
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             board.innerHTML = '';
+            if (ensureProductionOrders()) {
+                localStorage.setItem(KANBAN_CARDS_STORAGE_KEY, JSON.stringify(cards));
+            }
 
             COLUMNS.forEach(col => {
                 const colCards = cards.filter(c => c.column === col.id && (
-                    !search ||
-                    c.title.toLowerCase().includes(search) ||
+                    !search || 
+                    c.title.toLowerCase().includes(search) || 
                     c.client.toLowerCase().includes(search) ||
                     (c.quoteNumber && c.quoteNumber.toLowerCase().includes(search)) ||
                     (c.notes && c.notes.toLowerCase().includes(search))
                 ));
+                if (isProductionColumn(col.id)) {
+                    colCards.sort((first, second) => (Number(first.productionOrder) || Infinity) - (Number(second.productionOrder) || Infinity));
+                }
 
                 const isCancelCol = col.id === 'cancelados';
 
@@ -733,8 +968,8 @@
                 colEl.innerHTML = `
                     <div class="p-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/80 ${col.color} border-t-2">
                         <div class="flex items-center gap-2">
-                            <h2 class="font-bold text-xs uppercase tracking-wider text-slate-200">${col.name}</h2>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${col.badge}">${colCards.length}</span>
+                            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-200">${col.name}</h2>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full ${col.badge}">${colCards.length}</span>
                         </div>
                         ${!isCancelCol ? `
                             <button onclick="openModal('${col.id}')" class="text-slate-400 hover:text-indigo-400 p-1 rounded transition-colors" title="Adicionar nesta coluna">
@@ -742,10 +977,10 @@
                             </button>
                         ` : ''}
                     </div>
-
-                    <div class="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 min-h-[150px]"
-                         ondragover="handleDragOver(event)"
-                         ondragleave="handleDragLeave(event)"
+                    
+                    <div class="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 min-h-[150px]" 
+                         ondragover="handleDragOver(event)" 
+                         ondragleave="handleDragLeave(event)" 
                          ondrop="handleDrop(event, '${col.id}')"
                          id="col-zone-${col.id}">
                     </div>
@@ -754,10 +989,10 @@
                 const zoneEl = colEl.querySelector(`#col-zone-${col.id}`);
 
                 if (colCards.length === 0) {
-                    zoneEl.innerHTML = `<div class="h-24 border-2 border-dashed border-slate-800/60 rounded-xl flex items-center justify-center text-slate-600 text-xs font-medium">Nenhum pedido</div>`;
+                    zoneEl.innerHTML = `<div class="h-24 border-2 border-dashed border-slate-800/60 rounded-xl flex items-center justify-center text-slate-300 text-sm font-medium">Nenhum pedido</div>`;
                 } else {
                     colCards.forEach(card => {
-                        zoneEl.appendChild(createCardElement(card));
+                        zoneEl.appendChild(createCompactCardElement(card));
                     });
                 }
 
@@ -773,7 +1008,7 @@
 
             const today = new Date();
             today.setHours(0,0,0,0);
-
+            
             const due = new Date(dueDateStr + 'T00:00:00');
             const diffTime = due.getTime() - today.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -848,10 +1083,10 @@
             if (card.phone) {
                 const cleanPhone = card.phone.replace(/\D/g, '');
                 whatsappHtml = `
-                    <a href="https://wa.me/${cleanPhone}?text=Olá%20${encodeURIComponent(card.client)},%20referente%20ao%20seu%20pedido%20de%20impressão%203D%20(${encodeURIComponent(card.title)})..."
-                       target="_blank"
-                       onclick="event.stopPropagation()"
-                       class="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 p-1 rounded transition-colors"
+                    <a href="https://wa.me/${cleanPhone}?text=Olá%20${encodeURIComponent(card.client)},%20referente%20ao%20seu%20pedido%20de%20impressão%203D%20(${encodeURIComponent(card.title)})..." 
+                       target="_blank" 
+                       onclick="event.stopPropagation()" 
+                       class="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 p-1 rounded transition-colors" 
                        title="WhatsApp do cliente">
                         <i class="fa-brands fa-whatsapp text-xs"></i>
                     </a>
@@ -932,6 +1167,110 @@
             return el;
         }
 
+        function createCompactCardElement(card) {
+            const items = normalizeOrderItems(card);
+            const includedItems = items.filter(item => item.included);
+            const totalUnits = getIncludedItemQuantity(items);
+            const completedUnits = includedItems.reduce((sum, item) => sum + (item.completed ? item.quantity : 0), 0);
+            const progressPercent = totalUnits ? Math.round(completedUnits / totalUnits * 100) : 0;
+            const totalValue = (Number(card.price) * Number(card.qty || 1)).toFixed(2);
+            const cleanPhone = String(card.phone || '').replace(/\D/g, '');
+            const columnIndex = COLUMNS.findIndex(column => column.id === card.column);
+            const approvedIndex = COLUMNS.findIndex(column => column.id === 'aprovados');
+            const statusMap = {
+                paid: { label: '100% Pago', class: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', icon: 'fa-circle-check' },
+                half: { label: '50% Entrada', class: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: 'fa-adjust' },
+                pending: { label: 'Pendente', class: 'bg-rose-500/20 text-rose-300 border-rose-500/40', icon: 'fa-clock' }
+            };
+            const status = statusMap[card.paymentStatus] || statusMap.pending;
+            const dateBadge = getDueDateBadge(card.createdDate, card.dueDate);
+            const safeClient = escapeHTML(card.client || 'Cliente Não Informado');
+            const safeTitle = escapeHTML(card.title || getProductSummary(items));
+            const cardElement = document.createElement('article');
+            cardElement.className = `premium-card border rounded-xl shadow-md transition-all duration-200 cursor-pointer relative group ${card.column === 'cancelados' ? 'opacity-70 grayscale-[0.3]' : ''}`;
+            cardElement.draggable = true;
+            cardElement.tabIndex = 0;
+            cardElement.setAttribute('aria-label', `Editar pedido de ${card.client || 'cliente'}: ${card.title || ''}`);
+            cardElement.addEventListener('dragstart', event => handleDragStart(event, card.id));
+            cardElement.addEventListener('dragend', handleDragEnd);
+            cardElement.addEventListener('click', event => {
+                if (event.target.closest('button, input, a, label')) return;
+                openModalForEdit(card.id);
+            });
+            cardElement.addEventListener('keydown', event => {
+                if ((event.key === 'Enter' || event.key === ' ') && event.target === cardElement) {
+                    event.preventDefault();
+                    openModalForEdit(card.id);
+                }
+            });
+
+            const productionOrderHtml = isProductionColumn(card.column) ? `
+                <label class="card-production-order inline-flex items-center gap-1.5 rounded-md border border-fuchsia-300/20 bg-fuchsia-500/10 px-2 py-1 text-fuchsia-100" title="Edite o número para alterar a ordem de produção">
+                    <i class="fa-solid fa-list-ol text-fuchsia-300"></i>
+                    <span>Fila</span>
+                    <input data-action="production-order" type="number" min="1" step="1" value="${Number(card.productionOrder) || ''}" aria-label="Posição na fila de produção" class="w-12 rounded border border-fuchsia-300/20 bg-slate-950 px-1 py-0.5 text-center text-sm font-bold text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-400">
+                </label>
+            ` : '';
+            const progressHtml = includedItems.length > 1 ? `
+                <div class="mt-2" aria-label="Progresso da produção: ${progressPercent}%">
+                    <div class="mb-1 flex items-center justify-between text-xs text-slate-300">
+                        <span><i class="fa-solid fa-cubes-stacked mr-1 text-fuchsia-300"></i>Produção</span>
+                        <span>${completedUnits}/${totalUnits} un. (${progressPercent}%)</span>
+                    </div>
+                    <div class="card-production-progress"><div class="card-production-progress-fill" style="width: ${progressPercent}%"></div></div>
+                </div>
+            ` : '';
+            const paymentStatusHtml = columnIndex >= approvedIndex ? `
+                <button data-action="payment" class="flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold ${status.class}" title="Clique para alterar status financeiro">
+                    <i class="fa-solid ${status.icon}"></i><span>${status.label}</span>
+                </button>
+            ` : '';
+
+            cardElement.innerHTML = `
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <span class="card-client block truncate uppercase tracking-wide">${safeClient}</span>
+                        <h3 class="card-title mt-0.5 truncate font-semibold text-slate-100">${safeTitle}</h3>
+                        ${card.quoteNumber ? `<span class="card-quote mt-1 block truncate font-bold tracking-wide text-fuchsia-300"><i class="fa-solid fa-file-invoice mr-1"></i>${escapeHTML(card.quoteNumber)}</span>` : ''}
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                        ${cleanPhone ? `<a data-action="whatsapp" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Olá ${card.client}, referente ao seu pedido de impressão 3D (${card.title})...`)}" target="_blank" rel="noopener noreferrer" class="rounded-lg bg-emerald-500/10 p-2 text-emerald-300 hover:bg-emerald-500/20" title="WhatsApp do cliente"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                        <button data-action="edit" class="rounded-lg p-2 text-slate-300 hover:bg-white/10" title="Editar pedido"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                </div>
+                <div class="card-summary mt-2 flex items-center justify-between gap-2 border-y border-slate-700/50 bg-slate-950/20 px-1.5 py-1.5 text-slate-200">
+                    <span class="truncate text-slate-300">${totalUnits} un.</span>
+                    <span class="shrink-0 font-bold">R$ ${totalValue}</span>
+                </div>
+                ${productionOrderHtml}
+                ${progressHtml}
+                <div class="mt-2 flex items-center justify-between gap-2">
+                    <button data-action="due-date" class="min-w-0 truncate rounded-md border px-2 py-1.5 text-left text-xs transition-all ${dateBadge.class}" title="Criado em: ${formatDateBR(card.createdDate)}. Clique para editar o pedido.">
+                        <i class="fa-solid ${dateBadge.icon} mr-1"></i>${dateBadge.label}
+                    </button>
+                    <div class="flex shrink-0 items-center gap-1">
+                        ${paymentStatusHtml}
+                        ${columnIndex > 0 ? '<button data-action="back" class="rounded-md bg-slate-700/50 p-2 text-sm text-slate-300 hover:text-amber-300" title="Retroceder coluna"><i class="fa-solid fa-arrow-left"></i></button>' : ''}
+                        ${columnIndex < COLUMNS.length - 2 ? '<button data-action="forward" class="rounded-md bg-slate-700/50 p-2 text-sm text-slate-300 hover:text-indigo-300" title="Avançar coluna"><i class="fa-solid fa-arrow-right"></i></button>' : ''}
+                        ${card.column !== 'cancelados' ? '<button data-action="cancel" class="rounded-md bg-rose-950/30 p-2 text-sm text-rose-300/80 hover:text-rose-200" title="Cancelar pedido"><i class="fa-solid fa-ban"></i></button>' : ''}
+                    </div>
+                </div>
+            `;
+
+            cardElement.querySelector('[data-action="edit"]').addEventListener('click', () => openModalForEdit(card.id));
+            cardElement.querySelector('[data-action="due-date"]').addEventListener('click', () => openModalForEdit(card.id));
+            cardElement.querySelector('[data-action="payment"]')?.addEventListener('click', event => cyclePaymentStatus(event, card.id));
+            cardElement.querySelector('[data-action="back"]')?.addEventListener('click', event => moveCardStep(event, card.id, -1));
+            cardElement.querySelector('[data-action="forward"]')?.addEventListener('click', event => moveCardStep(event, card.id, 1));
+            cardElement.querySelector('[data-action="cancel"]')?.addEventListener('click', event => cancelCardDirect(event, card.id));
+            cardElement.querySelector('[data-action="production-order"]')?.addEventListener('change', event => {
+                event.stopPropagation();
+                changeProductionOrder(card.id, event.target.value);
+            });
+
+            return cardElement;
+        }
+
         // DRAG & DROP HANDLERS
         function handleDragStart(e, id) {
             draggedCardId = id;
@@ -953,12 +1292,57 @@
             e.preventDefault();
             if (!draggedCardId) return;
 
-            const cardIndex = cards.findIndex(c => c.id === draggedCardId);
-            if (cardIndex !== -1) {
-                cards[cardIndex].column = targetColumnId;
-                saveCardsState();
-                renderBoard();
+            const card = cards.find(c => c.id === draggedCardId);
+            if (card) moveCardToColumn(card, targetColumnId);
+        }
+
+        function moveCardToColumn(card, targetColumnId) {
+            const targetIndex = COLUMNS.findIndex(column => column.id === targetColumnId);
+            if (targetIndex < 0) return;
+
+            if (requiresDueDate(targetColumnId) && getIncludedItemQuantity(normalizeOrderItems(card)) === 0) {
+                openModalForEdit(card.id, targetColumnId);
+                showIntegrationNotice('Inclua pelo menos um produto aprovado antes de avançar o pedido.', 'error');
+                return;
             }
+
+            if (requiresDueDate(targetColumnId) && !card.dueDate) {
+                openModalForEdit(card.id, targetColumnId);
+                showIntegrationNotice('Informe a data de entrega para aprovar ou avançar este pedido.', 'error');
+                return;
+            }
+
+            card.column = targetColumnId;
+            if (isProductionColumn(targetColumnId) && !(Number(card.productionOrder) > 0)) {
+                card.productionOrder = getNextProductionOrder();
+            }
+            saveCardsState();
+            renderBoard();
+        }
+
+        function changeProductionOrder(cardId, value) {
+            const card = cards.find(existingCard => existingCard.id === cardId);
+            const requestedOrder = Number(value);
+            if (!card || !Number.isInteger(requestedOrder) || requestedOrder < 1) {
+                showIntegrationNotice('A posição na fila deve ser um número inteiro maior que zero.', 'error');
+                renderBoard();
+                return;
+            }
+
+            const productionCards = cards.filter(existingCard => isProductionColumn(existingCard.column))
+                .sort((first, second) => Number(first.productionOrder) - Number(second.productionOrder));
+            if (requestedOrder > productionCards.length) {
+                showIntegrationNotice(`A posição deve estar entre 1 e ${productionCards.length}.`, 'error');
+                renderBoard();
+                return;
+            }
+            productionCards.splice(productionCards.indexOf(card), 1);
+            productionCards.splice(requestedOrder - 1, 0, card);
+            productionCards.forEach((productionCard, index) => {
+                productionCard.productionOrder = index + 1;
+            });
+            saveCardsState();
+            renderBoard();
         }
 
         // CICLAR STATUS DE PAGAMENTO
@@ -985,9 +1369,7 @@
             const newIndex = currentIndex + direction;
 
             if (newIndex >= 0 && newIndex < COLUMNS.length) {
-                card.column = COLUMNS[newIndex].id;
-                saveCardsState();
-                renderBoard();
+                moveCardToColumn(card, COLUMNS[newIndex].id);
             }
         }
 
@@ -1007,35 +1389,34 @@
             const selectedColumnIndex = COLUMNS.findIndex(column => column.id === selectedColumnId);
             const approvedColumnIndex = COLUMNS.findIndex(column => column.id === 'aprovados');
             document.getElementById('payment-status-container').classList.toggle('hidden', selectedColumnIndex < approvedColumnIndex);
+            const dueDateInput = document.getElementById('field-due-date');
+            const dueDateLabel = document.getElementById('field-due-date-label');
+            const dueDateRequired = requiresDueDate(selectedColumnId);
+            dueDateInput.required = dueDateRequired;
+            dueDateLabel.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> Data de Entrega${dueDateRequired ? ' *' : ''}`;
         }
 
         // ABRIR MODAL PARA NOVO PEDIDO
         function openModal(defaultCol = 'orc_recebidos') {
             const today = formatDateToISO(new Date());
 
-            // Sugere entrega para 3 dias a partir de hoje
-            const defaultDue = new Date();
-            defaultDue.setDate(defaultDue.getDate() + 3);
-
             document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-cube text-indigo-400"></i> Novo Pedido de Impressão`;
             document.getElementById('card-id').value = '';
             document.getElementById('field-client').value = '';
             document.getElementById('field-phone').value = '';
-            document.getElementById('field-title').value = '';
-            document.getElementById('field-quantity').value = '1';
-            document.getElementById('field-price').value = '';
+            renderOrderItems([]);
             document.getElementById('field-notes').value = '';
             document.getElementById('field-column').value = defaultCol;
             document.getElementById('field-created-date').value = today;
-            document.getElementById('field-due-date').value = formatDateToISO(defaultDue);
+            document.getElementById('field-due-date').value = '';
             updatePaymentStatusVisibility();
-
+            
             document.querySelector('input[name="payment-status"][value="pending"]').checked = true;
             document.getElementById('card-modal').classList.remove('hidden');
         }
 
         // ABRIR MODAL PARA EDIÇÃO
-        function openModalForEdit(cardId) {
+        function openModalForEdit(cardId, targetColumnId = null) {
             const card = cards.find(c => c.id === cardId);
             if (!card) return;
 
@@ -1043,11 +1424,9 @@
             document.getElementById('card-id').value = card.id;
             document.getElementById('field-client').value = card.client;
             document.getElementById('field-phone').value = card.phone || '';
-            document.getElementById('field-title').value = card.title;
-            document.getElementById('field-quantity').value = card.qty;
-            document.getElementById('field-price').value = card.price;
+            renderOrderItems(normalizeOrderItems(card));
             document.getElementById('field-notes').value = card.notes || '';
-            document.getElementById('field-column').value = card.column;
+            document.getElementById('field-column').value = targetColumnId || card.column;
             document.getElementById('field-created-date').value = card.createdDate || formatDateToISO(new Date());
             document.getElementById('field-due-date').value = card.dueDate || '';
 
@@ -1071,24 +1450,42 @@
             const id = document.getElementById('card-id').value;
             const client = document.getElementById('field-client').value.trim();
             const phone = document.getElementById('field-phone').value.trim();
-            const title = document.getElementById('field-title').value.trim();
-            const qty = parseInt(document.getElementById('field-quantity').value) || 1;
-            const price = parseFloat(document.getElementById('field-price').value) || 0;
+            const items = readOrderItems();
+            if (!items.length) {
+                showIntegrationNotice('Adicione pelo menos um produto ao pedido.', 'error');
+                return;
+            }
+            const includedItems = items.filter(item => item.included);
             const column = document.getElementById('field-column').value;
+            if (requiresDueDate(column) && !includedItems.length) {
+                showIntegrationNotice('Inclua pelo menos um produto aprovado antes de aprovar este pedido.', 'error');
+                return;
+            }
+            const title = getProductSummary(items);
+            const qty = 1;
+            const price = getIncludedItemTotal(items);
             const notes = document.getElementById('field-notes').value.trim();
             const createdDate = document.getElementById('field-created-date').value || formatDateToISO(new Date());
             const dueDate = document.getElementById('field-due-date').value;
             const existingCard = id ? cards.find(card => card.id === id) : null;
-            const approvedColumnIndex = COLUMNS.findIndex(cardColumn => cardColumn.id === 'aprovados');
+            if (requiresDueDate(column) && !dueDate) {
+                document.getElementById('field-due-date').focus();
+                showIntegrationNotice('A data de entrega é obrigatória a partir da etapa Aprovados.', 'error');
+                return;
+            }
             const selectedColumnIndex = COLUMNS.findIndex(cardColumn => cardColumn.id === column);
+            const approvedColumnIndex = COLUMNS.findIndex(cardColumn => cardColumn.id === 'aprovados');
             const paymentStatus = selectedColumnIndex >= approvedColumnIndex
-                ? document.querySelector('input[name="payment-status"]:checked').value
+                ? (document.querySelector('input[name="payment-status"]:checked')?.value || 'pending')
                 : (existingCard ? existingCard.paymentStatus || 'pending' : 'pending');
+            const productionOrder = isProductionColumn(column)
+                ? (Number(existingCard?.productionOrder) || getNextProductionOrder())
+                : existingCard?.productionOrder;
 
             if (id) {
                 const index = cards.findIndex(c => c.id === id);
                 if (index !== -1) {
-                    cards[index] = { ...cards[index], client, phone, title, qty, price, column, notes, createdDate, dueDate, paymentStatus };
+                    cards[index] = { ...cards[index], client, phone, title, qty, price, items, column, notes, createdDate, dueDate, paymentStatus, productionOrder };
                 }
             } else {
                 const newCard = {
@@ -1098,11 +1495,13 @@
                     title,
                     qty,
                     price,
+                    items,
                     column,
                     notes,
                     createdDate,
                     dueDate,
-                    paymentStatus
+                    paymentStatus,
+                    productionOrder
                 };
                 cards.push(newCard);
             }
@@ -1116,9 +1515,9 @@
         function updateDashboard() {
             // 1. Pedidos Aprovados: Apenas pedidos fora de orçamentos e cancelados
             const aprovadosCards = cards.filter(c => !QUOTE_COLUMNS.includes(c.column) && c.column !== 'cancelados');
-
-            // 2. Em Produção
-            const producaoCards = cards.filter(c => c.column === 'em_producao' || c.column === 'fila_producao');
+            
+            // 2. Valor total dos pedidos aprovados, da aprovação até a entrega
+            const totalAprovado = aprovadosCards.reduce((acc, card) => acc + (card.price * card.qty), 0);
 
             // 3. Em Orçamento (Total acumulado nas colunas de orçamento)
             const orcamentoCards = cards.filter(c => QUOTE_COLUMNS.includes(c.column));
@@ -1144,8 +1543,8 @@
 
             // Atualiza os elementos na tela
             document.getElementById('stat-aprovados').textContent = aprovadosCards.length;
-            document.getElementById('stat-producao').textContent = producaoCards.length;
             document.getElementById('stat-orcamento').textContent = `R$ ${totalEmOrcamento.toFixed(2)}`;
+            document.getElementById('stat-aprovados-valor').textContent = `R$ ${totalAprovado.toFixed(2)}`;
             document.getElementById('stat-caixa-real').textContent = `R$ ${caixaReal.toFixed(2)}`;
             document.getElementById('stat-a-receber').textContent = `R$ ${saldoAReceber.toFixed(2)}`;
         }
