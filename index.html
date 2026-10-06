@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanban Impressão 3D - Gestão de Pedidos</title>
+    <title>Celarte Impressão 3D</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome icons -->
@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --purple-deep: #2d1d4d;
@@ -76,6 +77,51 @@
             background: linear-gradient(145deg, rgba(39, 34, 63, 0.96), rgba(16, 22, 42, 0.97)) !important;
             border-color: rgba(213, 54, 126, 0.28) !important;
             box-shadow: 0 12px 26px rgba(10, 5, 22, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            padding: 0.65rem !important;
+        }
+
+        .premium-card .card-client {
+            color: #c4b5fd;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .premium-card .card-title {
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        .premium-card .card-quote,
+        .premium-card .card-production-order {
+            font-size: 0.75rem;
+        }
+
+        .premium-card .card-summary {
+            font-size: 0.8125rem;
+        }
+
+        .card-production-progress {
+            height: 0.375rem;
+            overflow: hidden;
+            border-radius: 9999px;
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .card-production-progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #8f4ec6, #d5367e);
+            transition: width 180ms ease;
+        }
+
+        #order-form label {
+            font-size: 0.875rem;
+        }
+
+        #order-form input,
+        #order-form select,
+        #order-form textarea {
+            font-size: 0.9375rem;
         }
 
         .premium-card::before {
@@ -118,8 +164,8 @@
 
         .site-logo {
             display: block;
-            width: min(420px, 68vw);
-            height: 54px;
+            width: min(220px, 45vw);
+            height: 155px;
             object-fit: contain;
             object-position: left center;
         }
@@ -141,7 +187,23 @@
         }
 
         .dashboard-row {
+            position: relative;
             border-top: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .dashboard-title {
+            margin: 0.4rem 0 0.65rem;
+            background: linear-gradient(90deg, #d5367e 20%, #c07add 50%, #8f4ec6 80%);
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 2px 10px rgba(143, 78, 198, 0.22));
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            font-weight: 800;
+            letter-spacing: 0.025em;
+            line-height: 1.15;
+            text-align: center;
+            -webkit-background-clip: text;
         }
 
         .dashboard-stat {
@@ -172,10 +234,63 @@
             color: #ffe4e6;
         }
 
+        @media (min-width: 1280px) {
+            header .header-content {
+                display: grid;
+                grid-template-columns: clamp(220px, 23vw, 320px) minmax(0, 1fr);
+                grid-template-rows: 58px auto auto;
+                column-gap: 1rem;
+                max-width: none !important;
+            }
+
+            .header-content > .header-top {
+                display: contents;
+            }
+
+            .site-logo {
+                grid-column: 1;
+                grid-row: 1 / 4;
+                align-self: center;
+                width: 100%;
+                height: 210px;
+                object-fit: contain;
+                object-position: left center;
+            }
+
+            .header-top > .ml-auto {
+                grid-column: 2;
+                grid-row: 1;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .dashboard-title {
+                grid-column: 2;
+                grid-row: 2;
+            }
+
+            .dashboard-row {
+                grid-column: 2;
+                grid-row: 3;
+                min-width: 0;
+                margin-top: 0;
+                border-top: 0;
+            }
+
+            .dashboard-row::before {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: calc(100vw - clamp(220px, 23vw, 320px) - 2rem);
+                border-top: 1px solid rgba(255, 255, 255, 0.07);
+                content: "";
+            }
+        }
+
         @media (max-width: 640px) {
             .site-logo {
-                width: min(300px, 68vw);
-                height: 42px;
+                width: min(132px, 36vw);
+                height: 92px;
             }
 
             .header-menu-button {
@@ -189,13 +304,17 @@
 
     <!-- HEADER & DASHBOARD METRICS -->
     <header class="border-b px-4 py-3 shrink-0 backdrop-blur-md relative z-20">
-        <div class="max-w-7xl mx-auto w-full">
+        <div class="header-content max-w-7xl mx-auto w-full">
             <div class="header-top flex items-center gap-4">
-                <img class="site-logo" src="./celarte-logo.png" alt="Celarte Impressão 3D">
+                <img class="site-logo" src="./celarte-logo.png?v=20261001" alt="Celarte Impressão 3D">
                 <div class="ml-auto flex items-center gap-2">
-                    <button type="button" onclick="showCalculatorPage()" class="inline-flex items-center gap-2 rounded-xl border border-fuchsia-300/30 bg-slate-900/60 px-3 py-2.5 text-xs font-semibold text-fuchsia-100 shadow-lg shadow-fuchsia-950/20 transition-colors hover:border-fuchsia-300/60 hover:bg-fuchsia-500/15">
+                    <button type="button" onclick="showCalculatorPage()" aria-label="Calculadora 3D" class="inline-flex items-center gap-2 rounded-xl border border-fuchsia-300/30 bg-slate-900/60 px-3 py-2.5 text-xs font-semibold text-fuchsia-100 shadow-lg shadow-fuchsia-950/20 transition-colors hover:border-fuchsia-300/60 hover:bg-fuchsia-500/15">
                         <i class="fa-solid fa-calculator text-fuchsia-300"></i>
-                        <span>Calculadora 3D</span>
+                        <span class="hidden sm:inline">Calculadora 3D</span>
+                    </button>
+                    <button type="button" onclick="showFinancePage()" aria-label="Financeiro" class="inline-flex items-center gap-2 rounded-xl border border-emerald-300/30 bg-slate-900/60 px-3 py-2.5 text-xs font-semibold text-emerald-100 shadow-lg shadow-emerald-950/20 transition-colors hover:border-emerald-300/60 hover:bg-emerald-500/15">
+                        <i class="fa-solid fa-wallet text-emerald-300"></i>
+                        <span class="hidden sm:inline">Financeiro</span>
                     </button>
                     <div class="relative shrink-0">
                     <button id="menu-toggle" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-controls="options-menu" aria-expanded="false" class="header-menu-button flex items-center justify-center text-white">
@@ -218,6 +337,8 @@
                 </div>
             </div>
 
+            <h1 class="dashboard-title hidden xl:block">Operação 3D</h1>
+
             <div class="dashboard-row mt-3 pt-3 flex flex-col xl:flex-row xl:items-center gap-3">
                 <!-- Dashboard Stats -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs flex-1">
@@ -232,12 +353,12 @@
                         </button>
                     </div>
                     <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
-                        <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Em Produção</span>
-                        <span id="stat-producao" class="text-base font-bold text-pink-300">0</span>
-                    </div>
-                    <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
                         <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Em Orçamento</span>
                         <span id="stat-orcamento" class="text-base font-bold text-violet-300">R$ 0,00</span>
+                    </div>
+                    <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
+                        <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Aprovados (Valor)</span>
+                        <span id="stat-aprovados-valor" class="text-base font-bold text-pink-300">R$ 0,00</span>
                     </div>
                     <div class="dashboard-stat border rounded-xl p-2 px-3 flex flex-col">
                         <span class="text-slate-300/70 text-[10px] font-medium uppercase tracking-wider">Caixa Real (Recebido)</span>
@@ -287,6 +408,95 @@
         <iframe id="calculator-frame" title="Calculadora e Gestão de Orçamentos Celarte 3D" class="flex-1 w-full border-0 bg-white" loading="lazy" allow="clipboard-read; clipboard-write"></iframe>
     </section>
 
+    <section id="finance-view" class="hidden flex-1 min-h-0 flex-col overflow-y-auto relative z-10 p-4 custom-scrollbar" aria-label="Financeiro">
+        <div class="mx-auto w-full max-w-7xl space-y-4">
+            <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/80 p-3 shadow-xl backdrop-blur-md">
+                <button type="button" onclick="showOperationPage()" class="inline-flex items-center gap-2 rounded-xl border border-fuchsia-300/30 bg-gradient-to-r from-violet-600/30 to-fuchsia-600/20 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors hover:border-fuchsia-300/60 hover:from-violet-600/50 hover:to-fuchsia-600/40">
+                    <i class="fa-solid fa-arrow-left text-fuchsia-200"></i>
+                    <span>Operação</span>
+                </button>
+                <h2 class="text-lg font-bold text-white sm:text-xl"><i class="fa-solid fa-wallet mr-2 text-emerald-300"></i>Financeiro</h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <article class="rounded-2xl border border-emerald-300/20 bg-slate-950/85 p-4 shadow-lg">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-200/80">Valor em caixa</p>
+                    <p id="finance-cash-balance" class="mt-2 text-2xl font-bold text-emerald-300">R$ 0,00</p>
+                    <p class="mt-1 text-xs text-slate-400">Recebimentos menos saídas</p>
+                </article>
+                <article class="rounded-2xl border border-sky-300/20 bg-slate-950/85 p-4 shadow-lg">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-sky-200/80">Total recebido</p>
+                    <p id="finance-total-received" class="mt-2 text-2xl font-bold text-sky-300">R$ 0,00</p>
+                    <p class="mt-1 text-xs text-slate-400">Pagamentos registrados nos pedidos</p>
+                </article>
+                <article class="rounded-2xl border border-amber-300/20 bg-slate-950/85 p-4 shadow-lg">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-amber-200/80">Valores a receber</p>
+                    <p id="finance-total-receivable" class="mt-2 text-2xl font-bold text-amber-300">R$ 0,00</p>
+                    <p class="mt-1 text-xs text-slate-400">Saldo dos pedidos aprovados</p>
+                </article>
+                <article class="rounded-2xl border border-rose-300/20 bg-slate-950/85 p-4 shadow-lg">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-rose-200/80">Saídas registradas</p>
+                    <p id="finance-total-expenses" class="mt-2 text-2xl font-bold text-rose-300">R$ 0,00</p>
+                    <p class="mt-1 text-xs text-slate-400">Despesas lançadas nesta página</p>
+                </article>
+            </div>
+
+            <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.6fr)]">
+                <form id="expense-form" onsubmit="saveExpense(event)" class="space-y-3 rounded-2xl border border-white/10 bg-slate-950/90 p-4 shadow-xl">
+                    <div>
+                        <h3 class="text-base font-bold text-white">Registrar saída</h3>
+                        <p class="mt-1 text-xs text-slate-400">Anote materiais e outros gastos da operação.</p>
+                    </div>
+                    <div>
+                        <label for="expense-description" class="mb-1 block text-sm font-medium text-slate-200">Descrição *</label>
+                        <input id="expense-description" type="text" required maxlength="120" placeholder="Ex.: Filamento PLA preto" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-400 focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                        <div>
+                            <label for="expense-category" class="mb-1 block text-sm font-medium text-slate-200">Categoria</label>
+                            <select id="expense-category" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-400 focus:outline-none">
+                                <option value="Filamento">Filamento</option>
+                                <option value="Acessórios">Acessórios</option>
+                                <option value="Tintas e acabamento">Tintas e acabamento</option>
+                                <option value="Embalagem">Embalagem</option>
+                                <option value="Manutenção">Manutenção</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="expense-date" class="mb-1 block text-sm font-medium text-slate-200">Data *</label>
+                            <input id="expense-date" type="date" required class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-400 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="expense-amount" class="mb-1 block text-sm font-medium text-slate-200">Valor (R$) *</label>
+                        <input id="expense-amount" type="number" min="0.01" step="0.01" required placeholder="0,00" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="expense-notes" class="mb-1 block text-sm font-medium text-slate-200">Observações</label>
+                        <textarea id="expense-notes" rows="2" maxlength="300" placeholder="Detalhes opcionais da despesa" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-400 focus:outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:from-emerald-500 hover:to-teal-500">
+                        <i class="fa-solid fa-plus mr-2"></i>Salvar saída
+                    </button>
+                </form>
+
+                <section class="min-w-0 rounded-2xl border border-white/10 bg-slate-950/90 p-4 shadow-xl">
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-white">Saídas</h3>
+                            <p class="mt-1 text-xs text-slate-400">Despesas lançadas para controle do caixa.</p>
+                        </div>
+                        <span id="finance-expense-count" class="rounded-full bg-rose-500/15 px-3 py-1 text-sm font-bold text-rose-200">0</span>
+                    </div>
+                    <div id="finance-expenses-list" class="space-y-2">
+                        <p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Nenhuma saída registrada.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
     <!-- MODAL CRIAR / EDITAR PEDIDO -->
     <div id="card-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -303,7 +513,7 @@
             <!-- Modal Form Body -->
             <form id="order-form" onsubmit="saveCard(event)" class="p-4 space-y-4 overflow-y-auto custom-scrollbar flex-1">
                 <input type="hidden" id="card-id">
-
+                
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Nome do Cliente *</label>
@@ -315,26 +525,23 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Nome da Peça / Projeto *</label>
-                    <input type="text" id="field-title" required placeholder="Ex: Suporte para Headset V2" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                </div>
+                <section class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="mb-2 flex items-center justify-between gap-2">
+                        <h4 class="font-semibold text-slate-200">Produtos do pedido</h4>
+                        <button type="button" onclick="addOrderItemRow()" class="rounded-lg border border-fuchsia-300/30 px-2.5 py-1.5 text-xs font-semibold text-fuchsia-200 hover:bg-fuchsia-500/10">
+                            <i class="fa-solid fa-plus mr-1"></i>Adicionar produto
+                        </button>
+                    </div>
+                    <p class="mb-2 text-xs text-slate-400">Desmarque os produtos que o cliente não aprovou; o valor e a quantidade serão atualizados.</p>
+                    <div id="field-items-list" class="space-y-2"></div>
+                    <p id="field-items-summary" class="mt-2 text-right text-sm font-semibold text-fuchsia-200"></p>
+                </section>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Quantidade</label>
-                        <input type="number" id="field-quantity" min="1" value="1" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Valor Unitário (R$)</label>
-                        <input type="number" step="0.01" min="0" id="field-price" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                    </div>
-                    <div class="col-span-2 sm:col-span-1">
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Coluna / Etapa</label>
-                        <select id="field-column" onchange="updatePaymentStatusVisibility()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
-                            <!-- Opções dinâmicas -->
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Coluna / Etapa</label>
+                    <select id="field-column" onchange="updatePaymentStatusVisibility()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none">
+                        <!-- Opções dinâmicas -->
+                    </select>
                 </div>
 
                 <!-- Datas de Criação e Entrega -->
@@ -346,44 +553,25 @@
                         <input type="date" id="field-created-date" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none" readonly>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-amber-400 mb-1">
-                            <i class="fa-solid fa-calendar-check mr-1"></i> Data de Entrega *
+                        <label id="field-due-date-label" class="block text-xs font-semibold text-amber-400 mb-1">
+                            <i class="fa-solid fa-calendar-check mr-1"></i> Data de Entrega
                         </label>
-                        <input type="date" id="field-due-date" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
+                        <input type="date" id="field-due-date" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
                     </div>
                 </div>
 
-                <!-- Campo de Status Financeiro -->
+                <!-- Campo de Valor Recebido -->
                 <div id="payment-status-container" class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <label class="block text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
-                        <span><i class="fa-solid fa-file-invoice-dollar text-emerald-400 mr-1"></i> Status do Pagamento:</span>
-                        <span class="text-[10px] text-slate-500 font-normal">(Fluxo de Caixa)</span>
+                    <label for="field-amount-received" class="mb-1 block text-sm font-semibold text-slate-200">
+                        <i class="fa-solid fa-money-bill-wave mr-1 text-emerald-300"></i>Valor já recebido (R$)
                     </label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="payment-status" value="paid" class="peer hidden">
-                            <div class="text-center p-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500 peer-checked:text-emerald-300 text-xs font-semibold transition-all">
-                                <i class="fa-solid fa-circle-check text-emerald-400 block mb-0.5"></i> 100% Pago
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="payment-status" value="half" class="peer hidden">
-                            <div class="text-center p-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 peer-checked:bg-amber-500/20 peer-checked:border-amber-500 peer-checked:text-amber-300 text-xs font-semibold transition-all">
-                                <i class="fa-solid fa-adjust text-amber-400 block mb-0.5"></i> 50% Entrada
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="payment-status" value="pending" class="peer hidden" checked>
-                            <div class="text-center p-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 peer-checked:bg-rose-500/20 peer-checked:border-rose-500 peer-checked:text-rose-300 text-xs font-semibold transition-all">
-                                <i class="fa-solid fa-clock text-rose-400 block mb-0.5"></i> Pendente
-                            </div>
-                        </label>
-                    </div>
+                    <input id="field-amount-received" type="number" min="0" step="0.01" value="0" inputmode="decimal" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-400 focus:outline-none">
+                    <p id="payment-balance-summary" class="mt-2 text-sm text-slate-400" aria-live="polite"></p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Observações / Especificações Técnicas</label>
-                    <textarea id="field-notes" rows="2" placeholder="Ex: Material PLA Preto, 20% Infill, Altura de camada 0.2mm..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"></textarea>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Observações</label>
+                    <textarea id="field-notes" rows="2" placeholder="Anotações opcionais sobre o pedido..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"></textarea>
                 </div>
 
                 <div class="pt-2 flex justify-end gap-2">
@@ -410,9 +598,11 @@
         // ETAPAS DE ORÇAMENTO
         const QUOTE_COLUMNS = ['orc_recebidos', 'orc_enviados'];
         const KANBAN_CARDS_STORAGE_KEY = 'kanban_3d_cards_v4';
+        const FINANCE_EXPENSES_STORAGE_KEY = 'kanban_3d_expenses_v1';
 
         // ESTADO GLOBAL DA APLICAÇÃO
         let cards = [];
+        let expenses = [];
         let draggedCardId = null;
         const CALCULATOR_URL = './calculadora/index.html';
         const CALCULATOR_ORIGIN = new URL(CALCULATOR_URL, window.location.href).origin;
@@ -458,8 +648,12 @@
         // CARREGAMENTO INICIAL
         window.onload = function() {
             loadCards();
+            loadExpenses();
             populateColumnSelect();
+            document.getElementById('expense-date').value = formatDateToISO(new Date());
+            document.getElementById('field-amount-received').addEventListener('input', updatePaymentBalanceSummary);
             renderBoard();
+            renderFinance();
             enableBoardDragScroll();
         };
 
@@ -506,13 +700,6 @@
             const quoteTotal = Number.isFinite(Number(quote.total)) && Number(quote.total) >= 0
                 ? Number(quote.total)
                 : totalFromItems;
-            const productSummary = items.length === 1
-                ? items[0].description
-                : `${items[0].description} + ${items.length - 1} ${items.length === 2 ? 'item' : 'itens'}`;
-            const itemDetails = items.map(item =>
-                `${item.description} — ${item.quantity}x R$ ${item.unitPrice.toFixed(2)} (R$ ${item.total.toFixed(2)})`
-            );
-            const notes = [quote.notes, ...itemDetails].filter(value => typeof value === 'string' && value.trim()).join('\n');
 
             const existingIndex = cards.findIndex(card => card.quoteNumber
                 && String(card.quoteNumber).trim().toLocaleUpperCase('pt-BR') === quoteKey);
@@ -521,21 +708,36 @@
                 : -1;
             const cardIndex = existingIndex !== -1 ? existingIndex : legacyIndex;
             const existingCard = cardIndex !== -1 ? cards[cardIndex] : null;
+            const existingItems = existingCard ? normalizeOrderItems(existingCard) : [];
+            const savedItems = items.map((item, index) => {
+                const matchingItem = existingItems[index]?.description === item.description
+                    ? existingItems[index]
+                    : existingItems.find(existingItem => existingItem.description === item.description);
+                return {
+                    ...item,
+                    completed: matchingItem?.completed || false,
+                    included: matchingItem?.included !== false
+                };
+            });
+            const allItemsIncluded = savedItems.every(item => item.included);
             const quoteCard = {
                 id: existingCard ? existingCard.id : quoteId,
                 quoteNumber,
                 client: typeof quote.clientName === 'string' && quote.clientName.trim() ? quote.clientName.trim() : 'Cliente Não Informado',
                 phone: typeof quote.clientPhone === 'string' ? quote.clientPhone.trim() : '',
-                title: productSummary,
+                title: getProductSummary(savedItems),
                 qty: 1,
-                price: quoteTotal,
+                price: allItemsIncluded ? quoteTotal : getIncludedItemTotal(savedItems),
+                items: savedItems,
                 column: existingCard && !QUOTE_COLUMNS.includes(existingCard.column)
                     ? existingCard.column
                     : 'orc_enviados',
-                paymentStatus: existingCard ? existingCard.paymentStatus || 'pending' : 'pending',
-                notes,
+                paymentStatus: existingCard ? getPaymentStatus(existingCard) : 'pending',
+                amountReceived: existingCard ? getReceivedAmount(existingCard) : 0,
+                notes: existingCard ? existingCard.notes || '' : '',
                 createdDate: existingCard ? existingCard.createdDate : formatDateToISO(new Date()),
-                dueDate: existingCard ? existingCard.dueDate : ''
+                dueDate: existingCard ? existingCard.dueDate : '',
+                productionOrder: existingCard ? existingCard.productionOrder : undefined
             };
 
             if (cardIndex === -1) cards.push(quoteCard);
@@ -566,12 +768,127 @@
             } else {
                 cards = [];
             }
+            if (ensureProductionOrders()) {
+                localStorage.setItem(KANBAN_CARDS_STORAGE_KEY, JSON.stringify(cards));
+            }
         }
 
         // SALVAR DADOS NO LOCALSTORAGE
         function saveCardsState() {
             localStorage.setItem(KANBAN_CARDS_STORAGE_KEY, JSON.stringify(cards));
             updateDashboard();
+        }
+
+        function loadExpenses() {
+            const saved = localStorage.getItem(FINANCE_EXPENSES_STORAGE_KEY);
+            if (!saved) {
+                expenses = [];
+                return;
+            }
+
+            try {
+                const parsedExpenses = JSON.parse(saved);
+                if (!Array.isArray(parsedExpenses)) throw new Error('O conteúdo salvo não é uma lista de despesas.');
+                expenses = parsedExpenses;
+            } catch (error) {
+                console.error('Não foi possível carregar as saídas financeiras salvas.', error);
+                expenses = [];
+                showIntegrationNotice('Não foi possível ler as despesas salvas neste navegador.', 'error');
+            }
+        }
+
+        function saveExpensesState() {
+            try {
+                localStorage.setItem(FINANCE_EXPENSES_STORAGE_KEY, JSON.stringify(expenses));
+            } catch (error) {
+                console.error('Não foi possível salvar as saídas financeiras.', error);
+                showIntegrationNotice('Não foi possível salvar a saída. Verifique o espaço disponível neste navegador.', 'error');
+                return false;
+            }
+
+            renderFinance();
+            return true;
+        }
+
+        function saveExpense(event) {
+            event.preventDefault();
+
+            const description = document.getElementById('expense-description').value.trim();
+            const amount = Number(document.getElementById('expense-amount').value);
+            const date = document.getElementById('expense-date').value;
+            if (!description || !date || !Number.isFinite(amount) || amount <= 0) {
+                showIntegrationNotice('Preencha a descrição, a data e um valor de saída maior que zero.', 'error');
+                return;
+            }
+
+            const expense = {
+                id: `expense_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                description,
+                category: document.getElementById('expense-category').value,
+                amount,
+                date,
+                notes: document.getElementById('expense-notes').value.trim()
+            };
+            expenses.unshift(expense);
+
+            if (!saveExpensesState()) {
+                expenses.shift();
+                return;
+            }
+            document.getElementById('expense-form').reset();
+            document.getElementById('expense-date').value = formatDateToISO(new Date());
+            showIntegrationNotice('Saída registrada no controle financeiro.');
+        }
+
+        function deleteExpense(expenseId) {
+            const expenseIndex = expenses.findIndex(expense => expense.id === expenseId);
+            if (expenseIndex === -1) return;
+            if (!window.confirm('Deseja remover esta saída do controle financeiro?')) return;
+
+            const [removedExpense] = expenses.splice(expenseIndex, 1);
+            if (!saveExpensesState()) expenses.splice(expenseIndex, 0, removedExpense);
+        }
+
+        function renderFinance() {
+            const financialCards = cards.filter(card => isApprovedStage(card.column));
+            const totalReceived = financialCards.reduce((total, card) => total + getReceivedAmount(card), 0);
+            const totalReceivable = financialCards.reduce((total, card) => total + Math.max(0, getOrderTotal(card) - getReceivedAmount(card)), 0);
+            const totalExpenses = expenses.reduce((total, expense) => total + (Number(expense.amount) || 0), 0);
+
+            document.getElementById('finance-cash-balance').textContent = formatCurrency(totalReceived - totalExpenses);
+            document.getElementById('finance-total-received').textContent = formatCurrency(totalReceived);
+            document.getElementById('finance-total-receivable').textContent = formatCurrency(totalReceivable);
+            document.getElementById('finance-total-expenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('finance-expense-count').textContent = String(expenses.length);
+
+            const expenseList = document.getElementById('finance-expenses-list');
+            if (expenses.length === 0) {
+                expenseList.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Nenhuma saída registrada.</p>';
+                return;
+            }
+
+            expenseList.innerHTML = expenses
+                .slice()
+                .sort((first, second) => String(second.date).localeCompare(String(first.date)))
+                .map(expense => `
+                    <article class="flex flex-col gap-3 rounded-xl border border-rose-300/10 bg-slate-900/75 p-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="min-w-0">
+                            <h4 class="truncate text-sm font-semibold text-white">${escapeHTML(expense.description)}</h4>
+                            <p class="mt-1 text-xs text-slate-400">${escapeHTML(expense.category || 'Outros')} · ${formatDateBR(expense.date)}</p>
+                            ${expense.notes ? `<p class="mt-1 break-words text-xs text-slate-300">${escapeHTML(expense.notes)}</p>` : ''}
+                        </div>
+                        <div class="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+                            <span class="text-base font-bold text-rose-300">− ${formatCurrency(expense.amount)}</span>
+                            <button type="button" data-delete-expense="${escapeHTML(expense.id)}" class="rounded-lg border border-rose-300/20 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/15" title="Remover saída" aria-label="Remover saída: ${escapeHTML(expense.description)}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </article>
+                `).join('');
+
+            expenseList.querySelectorAll('[data-delete-expense]').forEach(button => {
+                button.addEventListener('click', () => deleteExpense(button.dataset.deleteExpense));
+            });
         }
 
         // HELPER PARA FORMATAR DATA YYYY-MM-DD
@@ -584,6 +901,231 @@
             const parts = dateStr.split('-');
             if (parts.length === 3) return `${parts[2]}/${parts[1]}`;
             return dateStr;
+        }
+
+        function normalizeOrderItems(card) {
+            if (Array.isArray(card.items) && card.items.length) {
+                return card.items.map(item => {
+                    const quantity = Number.isFinite(Number(item.quantity)) && Number(item.quantity) > 0 ? Number(item.quantity) : 1;
+                    const unitPrice = Number.isFinite(Number(item.unitPrice)) && Number(item.unitPrice) >= 0 ? Number(item.unitPrice) : 0;
+                    return {
+                        description: String(item.description || '').trim(),
+                        quantity,
+                        unitPrice,
+                        total: Number.isFinite(Number(item.total)) && Number(item.total) >= 0 ? Number(item.total) : quantity * unitPrice,
+                        completed: Boolean(item.completed),
+                        included: item.included !== false
+                    };
+                }).filter(item => item.description);
+            }
+
+            if (!card.title) return [];
+            const quantity = Number.isFinite(Number(card.qty)) && Number(card.qty) > 0 ? Number(card.qty) : 1;
+            const unitPrice = Number.isFinite(Number(card.price)) && Number(card.price) >= 0 ? Number(card.price) : 0;
+            return [{
+                description: String(card.title),
+                quantity,
+                unitPrice,
+                total: quantity * unitPrice,
+                completed: false,
+                included: true
+            }];
+        }
+
+        function getProductSummary(items) {
+            const includedItems = items.filter(item => item.included !== false);
+            if (!includedItems.length) return 'Nenhum item incluído';
+            return includedItems.length === 1
+                ? includedItems[0].description
+                : `${includedItems[0].description} + ${includedItems.length - 1} ${includedItems.length === 2 ? 'item' : 'itens'}`;
+        }
+
+        function getIncludedItemQuantity(items) {
+            return items.reduce((sum, item) => sum + (item.included !== false ? item.quantity : 0), 0);
+        }
+
+        function getIncludedItemTotal(items) {
+            return items.reduce((sum, item) => sum + (item.included !== false ? item.total : 0), 0);
+        }
+
+        function getOrderTotal(card) {
+            return Math.max(0, Number(card.price) || 0) * Math.max(0, Number(card.qty) || 1);
+        }
+
+        function getReceivedAmount(card) {
+            if (card.amountReceived !== undefined && card.amountReceived !== null && card.amountReceived !== '') {
+                return Math.max(0, Number(card.amountReceived) || 0);
+            }
+
+            const total = getOrderTotal(card);
+            if (card.paymentStatus === 'paid') return total;
+            if (card.paymentStatus === 'half') return total / 2;
+            return 0;
+        }
+
+        function getPaymentStatusFromAmounts(total, received) {
+            if (received <= 0 || total <= 0) return 'pending';
+            return received >= total ? 'paid' : 'half';
+        }
+
+        function getPaymentStatus(card) {
+            return getPaymentStatusFromAmounts(getOrderTotal(card), getReceivedAmount(card));
+        }
+
+        function isApprovedStage(columnId) {
+            return !QUOTE_COLUMNS.includes(columnId)
+                && columnId !== 'cancelados'
+                && COLUMNS.findIndex(column => column.id === columnId) >= COLUMNS.findIndex(column => column.id === 'aprovados');
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(Number(value) || 0);
+        }
+
+        function updatePaymentBalanceSummary() {
+            const amountInput = document.getElementById('field-amount-received');
+            const summary = document.getElementById('payment-balance-summary');
+            if (!amountInput || !summary) return;
+            const received = Math.max(0, Number(amountInput.value) || 0);
+            const total = getIncludedItemTotal(readOrderItems());
+            const remaining = Math.max(0, total - received);
+            summary.textContent = `Total aprovado: ${formatCurrency(total)} · Falta receber: ${formatCurrency(remaining)}`;
+        }
+
+        function updateOrderItemsSummary() {
+            const items = readOrderItems();
+            const quantity = getIncludedItemQuantity(items);
+            const total = getIncludedItemTotal(items);
+            const summary = document.getElementById('field-items-summary');
+            if (summary) {
+                summary.textContent = `${quantity} unidade${quantity === 1 ? '' : 's'} incluída${quantity === 1 ? '' : 's'} · ${new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(total)}`;
+            }
+            updatePaymentBalanceSummary();
+        }
+
+        function isProductionColumn(columnId) {
+            return columnId === 'fila_producao' || columnId === 'em_producao';
+        }
+
+        function requiresDueDate(columnId) {
+            return columnId !== 'cancelados'
+                && COLUMNS.findIndex(column => column.id === columnId) >= COLUMNS.findIndex(column => column.id === 'aprovados');
+        }
+
+        function getNextProductionOrder() {
+            return cards.reduce((highest, card) => Math.max(highest, Number(card.productionOrder) || 0), 0) + 1;
+        }
+
+        function ensureProductionOrders() {
+            const missingOrderCards = cards.filter(card => isProductionColumn(card.column) && !(Number(card.productionOrder) > 0));
+            missingOrderCards.forEach(card => {
+                card.productionOrder = getNextProductionOrder();
+            });
+            return missingOrderCards.length > 0;
+        }
+
+        function readOrderItems() {
+            return Array.from(document.querySelectorAll('#field-items-list [data-order-item-row]')).map(row => {
+                const quantity = Number(row.querySelector('[data-item-quantity]').value);
+                const unitPrice = Number(row.querySelector('[data-item-price]').value);
+                return {
+                    description: row.querySelector('[data-item-description]').value.trim(),
+                    quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+                    unitPrice: Number.isFinite(unitPrice) && unitPrice >= 0 ? unitPrice : 0,
+                    total: (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
+                        * (Number.isFinite(unitPrice) && unitPrice >= 0 ? unitPrice : 0),
+                    completed: row.querySelector('[data-item-completed]').checked,
+                    included: row.querySelector('[data-item-included]').checked
+                };
+            }).filter(item => item.description);
+        }
+
+        function addOrderItemRow(item = {}) {
+            const row = document.createElement('div');
+            row.dataset.orderItemRow = 'true';
+            row.className = 'grid grid-cols-12 gap-2 rounded-lg border border-slate-800 bg-slate-900/70 p-2';
+            row.innerHTML = `
+                <div class="col-span-12">
+                    <label class="mb-1 block font-medium text-slate-300">Produto / peça *</label>
+                    <input data-item-description type="text" required placeholder="Ex: Suporte para Headset V2" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-fuchsia-400 focus:outline-none">
+                </div>
+                <div class="col-span-3">
+                    <label class="mb-1 block font-medium text-slate-300">Quantidade</label>
+                    <input data-item-quantity type="number" min="1" step="1" required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-fuchsia-400 focus:outline-none">
+                </div>
+                <div class="col-span-4">
+                    <label class="mb-1 block font-medium text-slate-300">Valor unitário (R$)</label>
+                    <input data-item-price type="number" min="0" step="0.01" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-fuchsia-400 focus:outline-none">
+                </div>
+                <label class="col-span-3 flex cursor-pointer flex-col items-center justify-center gap-1 text-center font-medium text-amber-200">
+                    <input data-item-included type="checkbox" class="h-4 w-4 accent-fuchsia-500">
+                    <span data-inclusion-label class="text-xs">Aprovado</span>
+                </label>
+                <label class="col-span-2 flex cursor-pointer flex-col items-center justify-center gap-1 text-center font-medium text-emerald-300">
+                    <input data-item-completed type="checkbox" class="h-4 w-4 accent-emerald-500">
+                    <span class="text-xs">Pronto</span>
+                </label>
+                <button type="button" data-remove-item class="col-span-1 self-center rounded-lg p-2 text-rose-300 hover:bg-rose-500/10" title="Remover produto" aria-label="Remover produto">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <div class="col-span-12 text-right text-xs text-slate-300">
+                    Total do produto: <strong data-item-total class="text-slate-100"></strong>
+                </div>
+            `;
+            row.querySelector('[data-item-description]').value = item.description || '';
+            row.querySelector('[data-item-quantity]').value = item.quantity || 1;
+            row.querySelector('[data-item-price]').value = Number.isFinite(Number(item.unitPrice)) ? item.unitPrice : '';
+            row.querySelector('[data-item-completed]').checked = Boolean(item.completed);
+            row.querySelector('[data-item-included]').checked = item.included !== false;
+            const updateItemInclusionState = () => {
+                const included = row.querySelector('[data-item-included]').checked;
+                row.classList.toggle('opacity-60', !included);
+                row.querySelector('[data-inclusion-label]').textContent = included ? 'Aprovado' : 'Não aprovado';
+                updateOrderItemsSummary();
+            };
+            const updateItemTotal = () => {
+                const quantity = Number(row.querySelector('[data-item-quantity]').value) || 0;
+                const unitPrice = Number(row.querySelector('[data-item-price]').value) || 0;
+                row.querySelector('[data-item-total]').textContent = new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(quantity * unitPrice);
+                updateItemInclusionState();
+            };
+            row.querySelector('[data-item-quantity]').addEventListener('input', updateItemTotal);
+            row.querySelector('[data-item-price]').addEventListener('input', updateItemTotal);
+            row.querySelector('[data-item-included]').addEventListener('change', updateItemTotal);
+            updateItemTotal();
+            row.querySelector('[data-remove-item]').addEventListener('click', () => {
+                const list = document.getElementById('field-items-list');
+                if (list.querySelectorAll('[data-order-item-row]').length === 1) {
+                    row.querySelector('[data-item-description]').value = '';
+                    row.querySelector('[data-item-quantity]').value = '1';
+                    row.querySelector('[data-item-price]').value = '';
+                    row.querySelector('[data-item-completed]').checked = false;
+                    row.querySelector('[data-item-included]').checked = true;
+                    updateItemTotal();
+                    return;
+                }
+                row.remove();
+                updateOrderItemsSummary();
+            });
+            document.getElementById('field-items-list').appendChild(row);
+            updateOrderItemsSummary();
+            return row;
+        }
+
+        function renderOrderItems(items) {
+            const list = document.getElementById('field-items-list');
+            list.replaceChildren();
+            (items.length ? items : [{}]).forEach(item => addOrderItemRow(item));
+            updateOrderItemsSummary();
         }
 
         // POPULAR COMBOBOX DE COLUNAS NO MODAL
@@ -605,6 +1147,7 @@
             document.getElementById('menu-toggle').setAttribute('aria-expanded', 'false');
             document.querySelector('header').classList.add('hidden');
             document.getElementById('board-scroll').classList.add('hidden');
+            document.getElementById('finance-view').classList.add('hidden');
 
             const calculatorView = document.getElementById('calculator-view');
             calculatorView.classList.remove('hidden');
@@ -614,10 +1157,23 @@
             if (!calculatorFrame.src) calculatorFrame.src = CALCULATOR_URL;
         }
 
+        function showFinancePage() {
+            closeModal();
+            document.getElementById('options-menu').classList.add('hidden');
+            document.getElementById('menu-toggle').setAttribute('aria-expanded', 'false');
+            document.querySelector('header').classList.add('hidden');
+            document.getElementById('board-scroll').classList.add('hidden');
+            document.getElementById('calculator-view').classList.add('hidden');
+            document.getElementById('calculator-view').classList.remove('flex');
+            document.getElementById('finance-view').classList.remove('hidden');
+            renderFinance();
+        }
+
         function showOperationPage() {
             const calculatorView = document.getElementById('calculator-view');
             calculatorView.classList.add('hidden');
             calculatorView.classList.remove('flex');
+            document.getElementById('finance-view').classList.add('hidden');
             document.querySelector('header').classList.remove('hidden');
             document.getElementById('board-scroll').classList.remove('hidden');
         }
@@ -643,15 +1199,21 @@
             const board = document.getElementById('kanban-board');
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             board.innerHTML = '';
+            if (ensureProductionOrders()) {
+                localStorage.setItem(KANBAN_CARDS_STORAGE_KEY, JSON.stringify(cards));
+            }
 
             COLUMNS.forEach(col => {
                 const colCards = cards.filter(c => c.column === col.id && (
-                    !search ||
-                    c.title.toLowerCase().includes(search) ||
+                    !search || 
+                    c.title.toLowerCase().includes(search) || 
                     c.client.toLowerCase().includes(search) ||
                     (c.quoteNumber && c.quoteNumber.toLowerCase().includes(search)) ||
                     (c.notes && c.notes.toLowerCase().includes(search))
                 ));
+                if (isProductionColumn(col.id)) {
+                    colCards.sort((first, second) => (Number(first.productionOrder) || Infinity) - (Number(second.productionOrder) || Infinity));
+                }
 
                 const isCancelCol = col.id === 'cancelados';
 
@@ -661,8 +1223,8 @@
                 colEl.innerHTML = `
                     <div class="p-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/80 ${col.color} border-t-2">
                         <div class="flex items-center gap-2">
-                            <h2 class="font-bold text-xs uppercase tracking-wider text-slate-200">${col.name}</h2>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${col.badge}">${colCards.length}</span>
+                            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-200">${col.name}</h2>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full ${col.badge}">${colCards.length}</span>
                         </div>
                         ${!isCancelCol ? `
                             <button onclick="openModal('${col.id}')" class="text-slate-400 hover:text-indigo-400 p-1 rounded transition-colors" title="Adicionar nesta coluna">
@@ -670,10 +1232,10 @@
                             </button>
                         ` : ''}
                     </div>
-
-                    <div class="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 min-h-[150px]"
-                         ondragover="handleDragOver(event)"
-                         ondragleave="handleDragLeave(event)"
+                    
+                    <div class="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 min-h-[150px]" 
+                         ondragover="handleDragOver(event)" 
+                         ondragleave="handleDragLeave(event)" 
                          ondrop="handleDrop(event, '${col.id}')"
                          id="col-zone-${col.id}">
                     </div>
@@ -682,10 +1244,10 @@
                 const zoneEl = colEl.querySelector(`#col-zone-${col.id}`);
 
                 if (colCards.length === 0) {
-                    zoneEl.innerHTML = `<div class="h-24 border-2 border-dashed border-slate-800/60 rounded-xl flex items-center justify-center text-slate-600 text-xs font-medium">Nenhum pedido</div>`;
+                    zoneEl.innerHTML = `<div class="h-24 border-2 border-dashed border-slate-800/60 rounded-xl flex items-center justify-center text-slate-300 text-sm font-medium">Nenhum pedido</div>`;
                 } else {
                     colCards.forEach(card => {
-                        zoneEl.appendChild(createCardElement(card));
+                        zoneEl.appendChild(createCompactCardElement(card));
                     });
                 }
 
@@ -701,7 +1263,7 @@
 
             const today = new Date();
             today.setHours(0,0,0,0);
-
+            
             const due = new Date(dueDateStr + 'T00:00:00');
             const diffTime = due.getTime() - today.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -756,8 +1318,8 @@
 
             // Tag de status de pagamento
             const statusMap = {
-                paid: { label: '100% Pago', class: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', icon: 'fa-circle-check' },
-                half: { label: '50% Entrada', class: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: 'fa-adjust' },
+                paid: { label: 'Pago', class: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', icon: 'fa-circle-check' },
+                half: { label: 'Parcial', class: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: 'fa-adjust' },
                 pending: { label: 'Pendente', class: 'bg-rose-500/20 text-rose-300 border-rose-500/40', icon: 'fa-clock' }
             };
             const currentStatus = statusMap[card.paymentStatus || 'pending'];
@@ -776,10 +1338,10 @@
             if (card.phone) {
                 const cleanPhone = card.phone.replace(/\D/g, '');
                 whatsappHtml = `
-                    <a href="https://wa.me/${cleanPhone}?text=Olá%20${encodeURIComponent(card.client)},%20referente%20ao%20seu%20pedido%20de%20impressão%203D%20(${encodeURIComponent(card.title)})..."
-                       target="_blank"
-                       onclick="event.stopPropagation()"
-                       class="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 p-1 rounded transition-colors"
+                    <a href="https://wa.me/${cleanPhone}?text=Olá%20${encodeURIComponent(card.client)},%20referente%20ao%20seu%20pedido%20de%20impressão%203D%20(${encodeURIComponent(card.title)})..." 
+                       target="_blank" 
+                       onclick="event.stopPropagation()" 
+                       class="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 p-1 rounded transition-colors" 
                        title="WhatsApp do cliente">
                         <i class="fa-brands fa-whatsapp text-xs"></i>
                     </a>
@@ -860,6 +1422,113 @@
             return el;
         }
 
+        function createCompactCardElement(card) {
+            const items = normalizeOrderItems(card);
+            const includedItems = items.filter(item => item.included);
+            const totalUnits = getIncludedItemQuantity(items);
+            const completedUnits = includedItems.reduce((sum, item) => sum + (item.completed ? item.quantity : 0), 0);
+            const progressPercent = totalUnits ? Math.round(completedUnits / totalUnits * 100) : 0;
+            const totalValue = (Number(card.price) * Number(card.qty || 1)).toFixed(2);
+            const cleanPhone = String(card.phone || '').replace(/\D/g, '');
+            const columnIndex = COLUMNS.findIndex(column => column.id === card.column);
+            const statusMap = {
+                paid: { label: 'Pago', class: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', icon: 'fa-circle-check' },
+                half: { label: 'Parcial', class: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: 'fa-adjust' },
+                pending: { label: 'Pendente', class: 'bg-rose-500/20 text-rose-300 border-rose-500/40', icon: 'fa-clock' }
+            };
+            const status = statusMap[getPaymentStatus(card)] || statusMap.pending;
+            const receivedAmount = getReceivedAmount(card);
+            const dateBadge = getDueDateBadge(card.createdDate, card.dueDate);
+            const safeClient = escapeHTML(card.client || 'Cliente Não Informado');
+            const safeTitle = escapeHTML(card.title || getProductSummary(items));
+            const cardElement = document.createElement('article');
+            cardElement.className = `premium-card border rounded-xl shadow-md transition-all duration-200 cursor-pointer relative group ${card.column === 'cancelados' ? 'opacity-70 grayscale-[0.3]' : ''}`;
+            cardElement.draggable = true;
+            cardElement.tabIndex = 0;
+            cardElement.setAttribute('aria-label', `Editar pedido de ${card.client || 'cliente'}: ${card.title || ''}`);
+            cardElement.addEventListener('dragstart', event => handleDragStart(event, card.id));
+            cardElement.addEventListener('dragend', handleDragEnd);
+            cardElement.addEventListener('click', event => {
+                if (event.target.closest('button, input, a, label')) return;
+                openModalForEdit(card.id);
+            });
+            cardElement.addEventListener('keydown', event => {
+                if ((event.key === 'Enter' || event.key === ' ') && event.target === cardElement) {
+                    event.preventDefault();
+                    openModalForEdit(card.id);
+                }
+            });
+
+            const productionOrderHtml = isProductionColumn(card.column) ? `
+                <label class="card-production-order inline-flex items-center gap-1.5 rounded-md border border-fuchsia-300/20 bg-fuchsia-500/10 px-2 py-1 text-fuchsia-100" title="Edite o número para alterar a ordem de produção">
+                    <i class="fa-solid fa-list-ol text-fuchsia-300"></i>
+                    <span>Fila</span>
+                    <input data-action="production-order" type="number" min="1" step="1" value="${Number(card.productionOrder) || ''}" aria-label="Posição na fila de produção" class="w-12 rounded border border-fuchsia-300/20 bg-slate-950 px-1 py-0.5 text-center text-sm font-bold text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-400">
+                </label>
+            ` : '';
+            const progressHtml = includedItems.length > 1 ? `
+                <div class="mt-2" aria-label="Progresso da produção: ${progressPercent}%">
+                    <div class="mb-1 flex items-center justify-between text-xs text-slate-300">
+                        <span><i class="fa-solid fa-cubes-stacked mr-1 text-fuchsia-300"></i>Produção</span>
+                        <span>${completedUnits}/${totalUnits} un. (${progressPercent}%)</span>
+                    </div>
+                    <div class="card-production-progress"><div class="card-production-progress-fill" style="width: ${progressPercent}%"></div></div>
+                </div>
+            ` : '';
+            const paymentStatusHtml = isApprovedStage(card.column) ? `
+                <button data-action="payment" class="flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold ${status.class}" title="Clique para editar o valor recebido">
+                    <i class="fa-solid ${status.icon}"></i><span>${status.label}: ${formatCurrency(receivedAmount)}</span>
+                </button>
+            ` : '';
+
+            cardElement.innerHTML = `
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <span class="card-client block truncate uppercase tracking-wide">${safeClient}</span>
+                        <h3 class="card-title mt-0.5 truncate font-semibold text-slate-100">${safeTitle}</h3>
+                        ${card.quoteNumber ? `<span class="card-quote mt-1 block truncate font-bold tracking-wide text-fuchsia-300"><i class="fa-solid fa-file-invoice mr-1"></i>${escapeHTML(card.quoteNumber)}</span>` : ''}
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                        ${cleanPhone ? `<a data-action="whatsapp" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Olá ${card.client}, referente ao seu pedido de impressão 3D (${card.title})...`)}" target="_blank" rel="noopener noreferrer" class="rounded-lg bg-emerald-500/10 p-2 text-emerald-300 hover:bg-emerald-500/20" title="WhatsApp do cliente"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                        <button data-action="edit" class="rounded-lg p-2 text-slate-300 hover:bg-white/10" title="Editar pedido"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                </div>
+                <div class="card-summary mt-2 flex items-center justify-between gap-2 border-y border-slate-700/50 bg-slate-950/20 px-1.5 py-1.5 text-slate-200">
+                    <span class="truncate text-slate-300">${totalUnits} un.</span>
+                    <span class="shrink-0 font-bold">R$ ${totalValue}</span>
+                </div>
+                ${productionOrderHtml}
+                ${progressHtml}
+                <div class="mt-2 flex items-center justify-between gap-2">
+                    <button data-action="due-date" class="min-w-0 truncate rounded-md border px-2 py-1.5 text-left text-xs transition-all ${dateBadge.class}" title="Criado em: ${formatDateBR(card.createdDate)}. Clique para editar o pedido.">
+                        <i class="fa-solid ${dateBadge.icon} mr-1"></i>${dateBadge.label}
+                    </button>
+                    <div class="flex shrink-0 items-center gap-1">
+                        ${paymentStatusHtml}
+                        ${columnIndex > 0 ? '<button data-action="back" class="rounded-md bg-slate-700/50 p-2 text-sm text-slate-300 hover:text-amber-300" title="Retroceder coluna"><i class="fa-solid fa-arrow-left"></i></button>' : ''}
+                        ${columnIndex < COLUMNS.length - 2 ? '<button data-action="forward" class="rounded-md bg-slate-700/50 p-2 text-sm text-slate-300 hover:text-indigo-300" title="Avançar coluna"><i class="fa-solid fa-arrow-right"></i></button>' : ''}
+                        ${card.column !== 'cancelados' ? '<button data-action="cancel" class="rounded-md bg-rose-950/30 p-2 text-sm text-rose-300/80 hover:text-rose-200" title="Cancelar pedido"><i class="fa-solid fa-ban"></i></button>' : ''}
+                    </div>
+                </div>
+            `;
+
+            cardElement.querySelector('[data-action="edit"]').addEventListener('click', () => openModalForEdit(card.id));
+            cardElement.querySelector('[data-action="due-date"]').addEventListener('click', () => openModalForEdit(card.id));
+            cardElement.querySelector('[data-action="payment"]')?.addEventListener('click', event => {
+                event.stopPropagation();
+                openModalForEdit(card.id);
+            });
+            cardElement.querySelector('[data-action="back"]')?.addEventListener('click', event => moveCardStep(event, card.id, -1));
+            cardElement.querySelector('[data-action="forward"]')?.addEventListener('click', event => moveCardStep(event, card.id, 1));
+            cardElement.querySelector('[data-action="cancel"]')?.addEventListener('click', event => cancelCardDirect(event, card.id));
+            cardElement.querySelector('[data-action="production-order"]')?.addEventListener('change', event => {
+                event.stopPropagation();
+                changeProductionOrder(card.id, event.target.value);
+            });
+
+            return cardElement;
+        }
+
         // DRAG & DROP HANDLERS
         function handleDragStart(e, id) {
             draggedCardId = id;
@@ -881,24 +1550,55 @@
             e.preventDefault();
             if (!draggedCardId) return;
 
-            const cardIndex = cards.findIndex(c => c.id === draggedCardId);
-            if (cardIndex !== -1) {
-                cards[cardIndex].column = targetColumnId;
-                saveCardsState();
-                renderBoard();
-            }
+            const card = cards.find(c => c.id === draggedCardId);
+            if (card) moveCardToColumn(card, targetColumnId);
         }
 
-        // CICLAR STATUS DE PAGAMENTO
-        function cyclePaymentStatus(event, cardId) {
-            event.stopPropagation();
-            const card = cards.find(c => c.id === cardId);
-            if (!card) return;
+        function moveCardToColumn(card, targetColumnId) {
+            const targetIndex = COLUMNS.findIndex(column => column.id === targetColumnId);
+            if (targetIndex < 0) return;
 
-            const order = ['pending', 'half', 'paid'];
-            const nextIndex = (order.indexOf(card.paymentStatus || 'pending') + 1) % order.length;
-            card.paymentStatus = order[nextIndex];
+            if (requiresDueDate(targetColumnId) && getIncludedItemQuantity(normalizeOrderItems(card)) === 0) {
+                openModalForEdit(card.id, targetColumnId);
+                showIntegrationNotice('Inclua pelo menos um produto aprovado antes de avançar o pedido.', 'error');
+                return;
+            }
 
+            if (requiresDueDate(targetColumnId) && !card.dueDate) {
+                openModalForEdit(card.id, targetColumnId);
+                showIntegrationNotice('Informe a data de entrega para aprovar ou avançar este pedido.', 'error');
+                return;
+            }
+
+            card.column = targetColumnId;
+            if (isProductionColumn(targetColumnId) && !(Number(card.productionOrder) > 0)) {
+                card.productionOrder = getNextProductionOrder();
+            }
+            saveCardsState();
+            renderBoard();
+        }
+
+        function changeProductionOrder(cardId, value) {
+            const card = cards.find(existingCard => existingCard.id === cardId);
+            const requestedOrder = Number(value);
+            if (!card || !Number.isInteger(requestedOrder) || requestedOrder < 1) {
+                showIntegrationNotice('A posição na fila deve ser um número inteiro maior que zero.', 'error');
+                renderBoard();
+                return;
+            }
+
+            const productionCards = cards.filter(existingCard => isProductionColumn(existingCard.column))
+                .sort((first, second) => Number(first.productionOrder) - Number(second.productionOrder));
+            if (requestedOrder > productionCards.length) {
+                showIntegrationNotice(`A posição deve estar entre 1 e ${productionCards.length}.`, 'error');
+                renderBoard();
+                return;
+            }
+            productionCards.splice(productionCards.indexOf(card), 1);
+            productionCards.splice(requestedOrder - 1, 0, card);
+            productionCards.forEach((productionCard, index) => {
+                productionCard.productionOrder = index + 1;
+            });
             saveCardsState();
             renderBoard();
         }
@@ -913,9 +1613,7 @@
             const newIndex = currentIndex + direction;
 
             if (newIndex >= 0 && newIndex < COLUMNS.length) {
-                card.column = COLUMNS[newIndex].id;
-                saveCardsState();
-                renderBoard();
+                moveCardToColumn(card, COLUMNS[newIndex].id);
             }
         }
 
@@ -932,38 +1630,35 @@
 
         function updatePaymentStatusVisibility() {
             const selectedColumnId = document.getElementById('field-column').value;
-            const selectedColumnIndex = COLUMNS.findIndex(column => column.id === selectedColumnId);
-            const approvedColumnIndex = COLUMNS.findIndex(column => column.id === 'aprovados');
-            document.getElementById('payment-status-container').classList.toggle('hidden', selectedColumnIndex < approvedColumnIndex);
+            document.getElementById('payment-status-container').classList.toggle('hidden', !isApprovedStage(selectedColumnId));
+            const dueDateInput = document.getElementById('field-due-date');
+            const dueDateLabel = document.getElementById('field-due-date-label');
+            const dueDateRequired = requiresDueDate(selectedColumnId);
+            dueDateInput.required = dueDateRequired;
+            dueDateLabel.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> Data de Entrega${dueDateRequired ? ' *' : ''}`;
         }
 
         // ABRIR MODAL PARA NOVO PEDIDO
         function openModal(defaultCol = 'orc_recebidos') {
             const today = formatDateToISO(new Date());
 
-            // Sugere entrega para 3 dias a partir de hoje
-            const defaultDue = new Date();
-            defaultDue.setDate(defaultDue.getDate() + 3);
-
             document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-cube text-indigo-400"></i> Novo Pedido de Impressão`;
             document.getElementById('card-id').value = '';
             document.getElementById('field-client').value = '';
             document.getElementById('field-phone').value = '';
-            document.getElementById('field-title').value = '';
-            document.getElementById('field-quantity').value = '1';
-            document.getElementById('field-price').value = '';
+            renderOrderItems([]);
             document.getElementById('field-notes').value = '';
             document.getElementById('field-column').value = defaultCol;
             document.getElementById('field-created-date').value = today;
-            document.getElementById('field-due-date').value = formatDateToISO(defaultDue);
+            document.getElementById('field-due-date').value = '';
+            document.getElementById('field-amount-received').value = '0';
             updatePaymentStatusVisibility();
-
-            document.querySelector('input[name="payment-status"][value="pending"]').checked = true;
+            updatePaymentBalanceSummary();
             document.getElementById('card-modal').classList.remove('hidden');
         }
 
         // ABRIR MODAL PARA EDIÇÃO
-        function openModalForEdit(cardId) {
+        function openModalForEdit(cardId, targetColumnId = null) {
             const card = cards.find(c => c.id === cardId);
             if (!card) return;
 
@@ -971,19 +1666,15 @@
             document.getElementById('card-id').value = card.id;
             document.getElementById('field-client').value = card.client;
             document.getElementById('field-phone').value = card.phone || '';
-            document.getElementById('field-title').value = card.title;
-            document.getElementById('field-quantity').value = card.qty;
-            document.getElementById('field-price').value = card.price;
+            renderOrderItems(normalizeOrderItems(card));
             document.getElementById('field-notes').value = card.notes || '';
-            document.getElementById('field-column').value = card.column;
+            document.getElementById('field-column').value = targetColumnId || card.column;
             document.getElementById('field-created-date').value = card.createdDate || formatDateToISO(new Date());
             document.getElementById('field-due-date').value = card.dueDate || '';
-
-            const payStatus = card.paymentStatus || 'pending';
-            const radio = document.querySelector(`input[name="payment-status"][value="${payStatus}"]`);
-            if (radio) radio.checked = true;
+            document.getElementById('field-amount-received').value = getReceivedAmount(card).toFixed(2);
 
             updatePaymentStatusVisibility();
+            updatePaymentBalanceSummary();
             document.getElementById('card-modal').classList.remove('hidden');
         }
 
@@ -999,24 +1690,47 @@
             const id = document.getElementById('card-id').value;
             const client = document.getElementById('field-client').value.trim();
             const phone = document.getElementById('field-phone').value.trim();
-            const title = document.getElementById('field-title').value.trim();
-            const qty = parseInt(document.getElementById('field-quantity').value) || 1;
-            const price = parseFloat(document.getElementById('field-price').value) || 0;
+            const items = readOrderItems();
+            if (!items.length) {
+                showIntegrationNotice('Adicione pelo menos um produto ao pedido.', 'error');
+                return;
+            }
+            const includedItems = items.filter(item => item.included);
             const column = document.getElementById('field-column').value;
+            if (requiresDueDate(column) && !includedItems.length) {
+                showIntegrationNotice('Inclua pelo menos um produto aprovado antes de aprovar este pedido.', 'error');
+                return;
+            }
+            const title = getProductSummary(items);
+            const qty = 1;
+            const price = getIncludedItemTotal(items);
             const notes = document.getElementById('field-notes').value.trim();
             const createdDate = document.getElementById('field-created-date').value || formatDateToISO(new Date());
             const dueDate = document.getElementById('field-due-date').value;
             const existingCard = id ? cards.find(card => card.id === id) : null;
-            const approvedColumnIndex = COLUMNS.findIndex(cardColumn => cardColumn.id === 'aprovados');
-            const selectedColumnIndex = COLUMNS.findIndex(cardColumn => cardColumn.id === column);
-            const paymentStatus = selectedColumnIndex >= approvedColumnIndex
-                ? document.querySelector('input[name="payment-status"]:checked').value
-                : (existingCard ? existingCard.paymentStatus || 'pending' : 'pending');
+            if (requiresDueDate(column) && !dueDate) {
+                document.getElementById('field-due-date').focus();
+                showIntegrationNotice('A data de entrega é obrigatória a partir da etapa Aprovados.', 'error');
+                return;
+            }
+            const inputReceivedAmount = Number(document.getElementById('field-amount-received').value);
+            if (isApprovedStage(column) && (!Number.isFinite(inputReceivedAmount) || inputReceivedAmount < 0)) {
+                document.getElementById('field-amount-received').focus();
+                showIntegrationNotice('Informe um valor recebido válido, igual ou maior que zero.', 'error');
+                return;
+            }
+            const amountReceived = isApprovedStage(column)
+                ? inputReceivedAmount
+                : (existingCard ? getReceivedAmount(existingCard) : 0);
+            const paymentStatus = getPaymentStatusFromAmounts(price * qty, amountReceived);
+            const productionOrder = isProductionColumn(column)
+                ? (Number(existingCard?.productionOrder) || getNextProductionOrder())
+                : existingCard?.productionOrder;
 
             if (id) {
                 const index = cards.findIndex(c => c.id === id);
                 if (index !== -1) {
-                    cards[index] = { ...cards[index], client, phone, title, qty, price, column, notes, createdDate, dueDate, paymentStatus };
+                    cards[index] = { ...cards[index], client, phone, title, qty, price, items, column, notes, createdDate, dueDate, paymentStatus, amountReceived, productionOrder };
                 }
             } else {
                 const newCard = {
@@ -1026,11 +1740,14 @@
                     title,
                     qty,
                     price,
+                    items,
                     column,
                     notes,
                     createdDate,
                     dueDate,
-                    paymentStatus
+                    paymentStatus,
+                    amountReceived,
+                    productionOrder
                 };
                 cards.push(newCard);
             }
@@ -1042,11 +1759,10 @@
 
         // ATUALIZAR CONTADORES DO DASHBOARD
         function updateDashboard() {
-            // 1. Pedidos Aprovados: Apenas pedidos fora de orçamentos e cancelados
-            const aprovadosCards = cards.filter(c => !QUOTE_COLUMNS.includes(c.column) && c.column !== 'cancelados');
-
-            // 2. Em Produção
-            const producaoCards = cards.filter(c => c.column === 'em_producao' || c.column === 'fila_producao');
+            const aprovadosCards = cards.filter(card => isApprovedStage(card.column));
+            
+            // 2. Valor total dos pedidos aprovados, da aprovação até a entrega
+            const totalAprovado = aprovadosCards.reduce((acc, card) => acc + (card.price * card.qty), 0);
 
             // 3. Em Orçamento (Total acumulado nas colunas de orçamento)
             const orcamentoCards = cards.filter(c => QUOTE_COLUMNS.includes(c.column));
@@ -1057,30 +1773,29 @@
             let saldoAReceber = 0;
 
             aprovadosCards.forEach(c => {
-                const valorTotal = c.price * c.qty;
-                const status = c.paymentStatus || 'pending';
-
-                if (status === 'paid') {
-                    caixaReal += valorTotal;
-                } else if (status === 'half') {
-                    caixaReal += (valorTotal / 2);
-                    saldoAReceber += (valorTotal / 2);
-                } else {
-                    saldoAReceber += valorTotal;
-                }
+                const valorTotal = getOrderTotal(c);
+                const recebido = getReceivedAmount(c);
+                caixaReal += recebido;
+                saldoAReceber += Math.max(0, valorTotal - recebido);
             });
 
             // Atualiza os elementos na tela
             document.getElementById('stat-aprovados').textContent = aprovadosCards.length;
-            document.getElementById('stat-producao').textContent = producaoCards.length;
             document.getElementById('stat-orcamento').textContent = `R$ ${totalEmOrcamento.toFixed(2)}`;
+            document.getElementById('stat-aprovados-valor').textContent = `R$ ${totalAprovado.toFixed(2)}`;
             document.getElementById('stat-caixa-real').textContent = `R$ ${caixaReal.toFixed(2)}`;
             document.getElementById('stat-a-receber').textContent = `R$ ${saldoAReceber.toFixed(2)}`;
+            renderFinance();
         }
 
         // EXPORTAR BACKUP JSON
         function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cards, null, 2));
+            const backup = {
+                version: 2,
+                cards,
+                expenses
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
             downloadAnchor.setAttribute("download", `kanban_3d_backup_${formatDateToISO(new Date())}.json`);
@@ -1091,26 +1806,49 @@
 
         // IMPORTAR BACKUP JSON
         function importData(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
             const fileReader = new FileReader();
             fileReader.onload = function(e) {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        cards = imported;
-                        saveCardsState();
-                        renderBoard();
+                    const importedCards = Array.isArray(imported) ? imported : imported?.cards;
+                    if (!Array.isArray(importedCards)) throw new Error('O arquivo não contém uma lista válida de pedidos.');
+                    if (!Array.isArray(imported) && imported.expenses !== undefined && !Array.isArray(imported.expenses)) {
+                        throw new Error('O arquivo contém uma lista de saídas inválida.');
                     }
-                } catch(err) {
-                    console.error("Erro ao importar backup", err);
+
+                    cards = importedCards;
+                    if (!Array.isArray(imported) && Array.isArray(imported.expenses)) expenses = imported.expenses;
+                    saveCardsState();
+                    if (!saveExpensesState()) {
+                        showIntegrationNotice('Os pedidos foram importados, mas não foi possível salvar as saídas do backup.', 'error');
+                        return;
+                    }
+                    renderBoard();
+                    showIntegrationNotice('Backup importado com sucesso.');
+                } catch(error) {
+                    console.error('Erro ao importar backup.', error);
+                    showIntegrationNotice(`Não foi possível importar o backup: ${error.message}`, 'error');
+                } finally {
+                    event.target.value = '';
                 }
             };
-            fileReader.readAsText(event.target.files[0]);
+            fileReader.onerror = function(error) {
+                console.error('Não foi possível ler o arquivo de backup.', error);
+                showIntegrationNotice('Não foi possível ler o arquivo de backup selecionado.', 'error');
+                event.target.value = '';
+            };
+            fileReader.readAsText(file);
         }
 
         // LIMPAR TUDO
         function clearAllData() {
             cards = [];
+            expenses = [];
+            localStorage.removeItem(FINANCE_EXPENSES_STORAGE_KEY);
             saveCardsState();
+            saveExpensesState();
             renderBoard();
         }
     </script>
