@@ -1392,33 +1392,34 @@
           <div class="form-row">
             <div class="form-group">
               <label>NOME DO PROJETO</label>
-              <input type="text" id="projectName" value="Chaveiro Personalizado">
+              <input type="text" id="projectName" value="">
             </div>
             <div class="form-group" style="max-width: 90px;">
               <label>QTD</label>
-              <input type="text" id="quantity" value="1" oninput="calculate()">
+              <input type="text" id="quantity" value="" oninput="calculate()">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label>PESO (G)</label>
-              <input type="text" id="weight" value="6,21" oninput="calculate()">
+              <input type="text" id="weight" value="" oninput="calculate()">
             </div>
             <div class="form-group">
               <label>TEMPO (HH:MM / MIN)</label>
-              <input type="text" id="printTime" value="0:40" oninput="calculate()">
+              <input type="text" id="printTime" value="" oninput="calculate()">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label>FILAMENTO/KG</label>
-              <input type="text" id="filamentCost" value="100,00" oninput="calculate()">
+              <input type="text" id="filamentCost" value="" oninput="calculate()">
             </div>
             <div class="form-group" style="max-width: 180px;">
               <label>TIPO DE MATERIAL</label>
               <select id="materialType" onchange="calculate()">
+                <option value="" selected>Selecione</option>
                 <option value="PLA">PLA</option>
                 <option value="PETG">PETG</option>
                 <option value="ABS">ABS</option>
@@ -1438,11 +1439,11 @@
           <div class="form-row">
             <div class="form-group">
               <label>EMBALAGEM</label>
-              <input type="text" id="packagingCost" value="0,40" oninput="calculate()">
+              <input type="text" id="packagingCost" value="" oninput="calculate()">
             </div>
             <div class="form-group">
               <label>EXTRAS</label>
-              <input type="text" id="extraCost" value="0,00" oninput="calculate()">
+              <input type="text" id="extraCost" value="" oninput="calculate()">
             </div>
           </div>
 
@@ -1450,10 +1451,10 @@
           <div class="form-group slider-wrapper">
             <div class="slider-header">
               <label>TAXA DE RISCO / FALHA (%)</label>
-              <span class="slider-value-badge" id="riskValue">15%</span>
+              <span class="slider-value-badge" id="riskValue">0%</span>
             </div>
             <div class="slider-container-sleek">
-              <input type="range" class="sleek-slider" id="riskRate" min="0" max="50" value="15" oninput="updateRiskText(this.value); calculate();">
+              <input type="range" class="sleek-slider" id="riskRate" min="0" max="50" value="0" oninput="updateRiskText(this.value); calculate();">
             </div>
           </div>
 
@@ -1466,13 +1467,13 @@
 
           <div class="form-group">
             <label>MARKUP DESEJADO (MULTIPLICADOR)</label>
-            <input type="text" id="markup" value="2,00" oninput="calculate()">
+            <input type="text" id="markup" value="" oninput="calculate()">
           </div>
 
           <!-- LUCRO REAL (%) INDICATOR & MINIMUM 100% WARNING -->
           <div class="profit-gauge-wrapper">
             <div class="profit-gauge-header">
-              <span class="label">LUCRO REAL (% SOBRE CUSTO DE PRODUÇÃO)</span>
+              <span class="label">LUCRO REAL (% SOBRE CUSTO TOTAL)</span>
               <span class="profit-gauge-value" id="realProfitValue">100.0%</span>
             </div>
             <div class="profit-gauge-track">
@@ -1740,7 +1741,6 @@
   let currentUnitSellingPrice = 0;
   let currentProjectTotalPrice = 0;
   let currentUnitCostTotal = 0;
-  let currentUnitProductionCost = 0;
   let currentUnitExtrasCost = 0;
 
   // LocalStorage keys
@@ -1967,20 +1967,18 @@
     let baseRiskCost = costFilament + costEnergy + costDepreciation;
     let costRisk = baseRiskCost * riskPct;
 
-    let unitCostTotal = baseRiskCost + costExtras + costRisk;
-    let unitProductionCost = unitCostTotal - costExtras;
+    let unitCostTotal = roundMoneyValue(baseRiskCost + costExtras + costRisk);
     let projectTotalCost = unitCostTotal * qty;
-    if (preserveProjectTotal && projectTotalOverride !== null && unitProductionCost > 0) {
-      markup = (projectTotalOverride / qty - costExtras) / unitProductionCost;
+    if (preserveProjectTotal && projectTotalOverride !== null && unitCostTotal > 0) {
+      markup = projectTotalOverride / qty / unitCostTotal;
       document.getElementById('markup').value = markup.toFixed(2).replace('.', ',');
     }
 
-    let unitSellingPrice = roundMoneyValue(unitProductionCost * markup) + costExtras;
+    let unitSellingPrice = roundMoneyValue(unitCostTotal * markup);
     let unitProfit = unitSellingPrice - unitCostTotal;
 
     currentUnitSellingPrice = unitSellingPrice;
     currentUnitCostTotal = unitCostTotal;
-    currentUnitProductionCost = unitProductionCost;
     currentUnitExtrasCost = costExtras;
 
     // Totals
@@ -2040,7 +2038,7 @@
     let warningBox = document.getElementById('profitWarningBox');
     let realProfitValueEl = document.getElementById('realProfitValue');
 
-    if (realProfitPct < 100) {
+    if (unitCostTotal > 0 && realProfitPct < 100) {
       warningBox.style.display = 'flex';
       realProfitBar.style.background = 'linear-gradient(90deg, #EF4444, #F59E0B)';
       realProfitValueEl.style.color = '#F87171';
@@ -2069,8 +2067,8 @@
     let name = document.getElementById('projectName').value.trim() || 'Item 3D';
     let qty = parseVal('quantity') || 1;
     let unitPrice = currentUnitSellingPrice;
-    let effectiveMarkup = currentUnitProductionCost > 0
-      ? (unitPrice - currentUnitExtrasCost) / currentUnitProductionCost
+    let effectiveMarkup = currentUnitCostTotal > 0
+      ? unitPrice / currentUnitCostTotal
       : 1;
     let total = unitPrice * qty;
 
@@ -2083,7 +2081,6 @@
       baseUnitPrice: unitPrice,
       baseMarkup: effectiveMarkup,
       baseUnitCost: currentUnitCostTotal,
-      baseProductionCost: currentUnitProductionCost,
       unitExtrasCost: currentUnitExtrasCost,
       effectiveMarkup: effectiveMarkup,
       date: getTodayDateString()
@@ -2109,24 +2106,35 @@
     return 0;
   }
 
+  function getBudgetItemBaseCost(item) {
+    if (Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0) {
+      return item.baseUnitCost;
+    }
+
+    let legacyProductionCost = Number.isFinite(item.baseProductionCost) && item.baseProductionCost >= 0
+      ? item.baseProductionCost
+      : null;
+    let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
+    if (legacyProductionCost !== null) return legacyProductionCost + unitExtrasCost;
+
+    let baseMarkup = Number.isFinite(item.baseMarkup) && item.baseMarkup > 0 ? item.baseMarkup : 1;
+    return item.unitPrice / baseMarkup;
+  }
+
   function applyWholesalePricing(item, quantity) {
     let discount = getWholesaleDiscount(quantity);
     let baseUnitPrice = Number.isFinite(item.baseUnitPrice) ? item.baseUnitPrice : item.unitPrice;
     let baseMarkup = Number.isFinite(item.baseMarkup) && item.baseMarkup > 0 ? item.baseMarkup : 1;
-    let baseProductionCost = Number.isFinite(item.baseProductionCost) && item.baseProductionCost >= 0
-      ? item.baseProductionCost
-      : Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
-      ? item.baseUnitCost
-      : baseUnitPrice / baseMarkup;
+    let baseUnitCost = getBudgetItemBaseCost(item);
     let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
 
     item.baseUnitPrice = baseUnitPrice;
     item.baseMarkup = baseMarkup;
-    item.baseProductionCost = baseProductionCost;
+    item.baseUnitCost = baseUnitCost;
     item.unitExtrasCost = unitExtrasCost;
     item.unitPrice = roundMoneyValue(baseUnitPrice * (1 - discount));
-    item.effectiveMarkup = baseProductionCost > 0
-      ? (item.unitPrice - unitExtrasCost) / baseProductionCost
+    item.effectiveMarkup = baseUnitCost > 0
+      ? item.unitPrice / baseUnitCost
       : 1;
     item.total = item.unitPrice * quantity;
   }
@@ -2159,20 +2167,16 @@
       let priceNum = roundMoneyValue(parseFloat(newPriceRaw.replace(',', '.')) || 0);
       item.unitPrice = priceNum;
       let discount = getWholesaleDiscount(item.quantity);
-      let baseProductionCost = Number.isFinite(item.baseProductionCost) && item.baseProductionCost >= 0
-        ? item.baseProductionCost
-        : Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
-          ? item.baseUnitCost
-        : item.unitPrice / (item.baseMarkup || 1);
+      let baseUnitCost = getBudgetItemBaseCost(item);
       let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
       item.baseUnitPrice = discount < 1 ? priceNum / (1 - discount) : priceNum;
-      item.baseProductionCost = baseProductionCost;
+      item.baseUnitCost = baseUnitCost;
       item.unitExtrasCost = unitExtrasCost;
-      item.baseMarkup = baseProductionCost > 0
-        ? (item.baseUnitPrice - unitExtrasCost) / baseProductionCost
+      item.baseMarkup = baseUnitCost > 0
+        ? item.baseUnitPrice / baseUnitCost
         : item.baseMarkup;
-      item.effectiveMarkup = baseProductionCost > 0
-        ? (priceNum - unitExtrasCost) / baseProductionCost
+      item.effectiveMarkup = baseUnitCost > 0
+        ? priceNum / baseUnitCost
         : 1;
       item.total = priceNum * item.quantity;
       renderBudgetTable(false); // Update totals without losing active edit focus
@@ -2185,21 +2189,17 @@
       let markupNum = parseFloat(newMarkupRaw.replace(',', '.'));
       if (!Number.isFinite(markupNum) || markupNum <= 0) return;
 
-      let baseProductionCost = Number.isFinite(item.baseProductionCost) && item.baseProductionCost >= 0
-        ? item.baseProductionCost
-        : Number.isFinite(item.baseUnitCost) && item.baseUnitCost >= 0
-          ? item.baseUnitCost
-        : item.unitPrice / (item.baseMarkup || 1);
+      let baseUnitCost = getBudgetItemBaseCost(item);
       let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
       let discount = getWholesaleDiscount(item.quantity);
 
-      item.baseProductionCost = baseProductionCost;
+      item.baseUnitCost = baseUnitCost;
       item.unitExtrasCost = unitExtrasCost;
-      item.baseUnitPrice = roundMoneyValue(baseProductionCost * markupNum) + unitExtrasCost;
+      item.baseUnitPrice = roundMoneyValue(baseUnitCost * markupNum);
       item.unitPrice = roundMoneyValue(item.baseUnitPrice * (1 - discount));
       item.baseMarkup = markupNum;
-      item.effectiveMarkup = baseProductionCost > 0
-        ? (item.unitPrice - unitExtrasCost) / baseProductionCost
+      item.effectiveMarkup = baseUnitCost > 0
+        ? item.unitPrice / baseUnitCost
         : 1;
       item.total = item.unitPrice * item.quantity;
       renderBudgetTable(false); // Update totals without losing active edit focus
@@ -2366,10 +2366,18 @@
   function createNewBudget() {
     budgetItems = [];
     budgetTotalOverride = null;
+    projectTotalOverride = null;
     document.getElementById('clientName').value = '';
     document.getElementById('clientPhone').value = '';
     document.getElementById('budgetNotes').value = '';
     document.getElementById('budgetNumberDisplay').innerText = getNextQuoteNumber();
+    ['projectName', 'quantity', 'weight', 'printTime', 'filamentCost', 'packagingCost', 'extraCost', 'markup']
+      .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('materialType').value = '';
+    document.getElementById('riskRate').value = '0';
+    document.getElementById('profitAwarenessCheckbox').checked = false;
+    updateRiskText(0);
+    calculate();
     renderBudgetTable();
   }
 
@@ -2416,6 +2424,11 @@
       document.getElementById('clientPhone').value = target.clientPhone || '';
       document.getElementById('budgetNotes').value = target.notes || '';
       budgetItems = target.items || [];
+      budgetItems.forEach(item => {
+        let baseUnitCost = getBudgetItemBaseCost(item);
+        item.baseUnitCost = baseUnitCost;
+        item.effectiveMarkup = baseUnitCost > 0 ? item.unitPrice / baseUnitCost : 1;
+      });
       budgetTotalOverride = typeof target.totalOverride === 'number' ? target.totalOverride : null;
       renderBudgetTable();
       closeImportModal();
