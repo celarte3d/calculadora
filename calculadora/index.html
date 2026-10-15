@@ -1451,10 +1451,10 @@
           <div class="form-group slider-wrapper">
             <div class="slider-header">
               <label>TAXA DE RISCO / FALHA (%)</label>
-              <span class="slider-value-badge" id="riskValue">0%</span>
+              <span class="slider-value-badge" id="riskValue">15%</span>
             </div>
             <div class="slider-container-sleek">
-              <input type="range" class="sleek-slider" id="riskRate" min="0" max="50" value="0" oninput="updateRiskText(this.value); calculate();">
+              <input type="range" class="sleek-slider" id="riskRate" min="0" max="50" value="15" oninput="updateRiskText(this.value); calculate();">
             </div>
           </div>
 
@@ -1467,7 +1467,7 @@
 
           <div class="form-group">
             <label>MARKUP DESEJADO (MULTIPLICADOR)</label>
-            <input type="text" id="markup" value="" oninput="calculate()">
+            <input type="text" id="markup" value="2.0" oninput="calculate()">
           </div>
 
           <!-- LUCRO REAL (%) INDICATOR & MINIMUM 100% WARNING -->
@@ -1879,6 +1879,13 @@
     return val.toFixed(2).replace('.', ',');
   }
 
+  function fmtUnitPriceValue(val, quantity) {
+    let decimalPlaces = Number.isInteger(val * 100)
+      ? 2
+      : Math.max(2, Math.ceil(Math.log10(Math.max(quantity, 1) * 100)) + 1);
+    return val.toFixed(decimalPlaces).replace('.', ',');
+  }
+
   function parseMoneyValue(value) {
     let raw = String(value || '').trim().replace(/[^\d,.-]/g, '');
     if (raw.includes(',')) raw = raw.replace(/\./g, '').replace(',', '.');
@@ -2098,12 +2105,41 @@
     }, 600);
   }
 
+  const WHOLESALE_TIERS = [
+    { maxQuantity: 10, discount: 0 },
+    { maxQuantity: 30, discount: 0.10 },
+    { maxQuantity: 40, discount: 0.15 },
+    { maxQuantity: 50, discount: 0.20 },
+    { maxQuantity: 99, discount: 0.25 },
+    { maxQuantity: Infinity, discount: 0.30 }
+  ];
+
+  function getWholesaleTierIndex(quantity) {
+    let tierIndex = WHOLESALE_TIERS.findIndex(tier => quantity <= tier.maxQuantity);
+    return tierIndex < 0 ? 0 : tierIndex;
+  }
+
   function getWholesaleDiscount(quantity) {
-    if (quantity >= 100) return 0.40;
-    if (quantity >= 50) return 0.30;
-    if (quantity >= 30) return 0.20;
-    if (quantity >= 10) return 0.10;
-    return 0;
+    return WHOLESALE_TIERS[getWholesaleTierIndex(quantity)].discount;
+  }
+
+  function getWholesalePricing(quantity, baseUnitPrice) {
+    let tierIndex = getWholesaleTierIndex(quantity);
+    let tier = WHOLESALE_TIERS[tierIndex];
+    let unitPrice = roundMoneyValue(baseUnitPrice * (1 - tier.discount));
+    let total = roundMoneyValue(unitPrice * quantity);
+
+    if (tierIndex > 0) {
+      let previousTier = WHOLESALE_TIERS[tierIndex - 1];
+      let minimumTotal = getWholesalePricing(previousTier.maxQuantity, baseUnitPrice).total;
+
+      if (total < minimumTotal) {
+        unitPrice = minimumTotal / quantity;
+        total = minimumTotal;
+      }
+    }
+
+    return { discount: tier.discount, unitPrice, total };
   }
 
   function getBudgetItemBaseCost(item) {
@@ -2122,21 +2158,21 @@
   }
 
   function applyWholesalePricing(item, quantity) {
-    let discount = getWholesaleDiscount(quantity);
     let baseUnitPrice = Number.isFinite(item.baseUnitPrice) ? item.baseUnitPrice : item.unitPrice;
     let baseMarkup = Number.isFinite(item.baseMarkup) && item.baseMarkup > 0 ? item.baseMarkup : 1;
     let baseUnitCost = getBudgetItemBaseCost(item);
     let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
+    let pricing = getWholesalePricing(quantity, baseUnitPrice);
 
     item.baseUnitPrice = baseUnitPrice;
     item.baseMarkup = baseMarkup;
     item.baseUnitCost = baseUnitCost;
     item.unitExtrasCost = unitExtrasCost;
-    item.unitPrice = roundMoneyValue(baseUnitPrice * (1 - discount));
+    item.unitPrice = pricing.unitPrice;
     item.effectiveMarkup = baseUnitCost > 0
       ? item.unitPrice / baseUnitCost
       : 1;
-    item.total = item.unitPrice * quantity;
+    item.total = pricing.total;
   }
 
   function updateBudgetItemDesc(id, newDesc) {
@@ -2164,7 +2200,9 @@
   function updateBudgetItemPrice(id, newPriceRaw) {
     let item = budgetItems.find(i => i.id === id);
     if (item) {
-      let priceNum = roundMoneyValue(parseFloat(newPriceRaw.replace(',', '.')) || 0);
+      if (newPriceRaw.trim() === fmtUnitPriceValue(item.unitPrice, item.quantity)) return;
+      let priceNum = parseFloat(newPriceRaw.replace(',', '.'));
+      if (!Number.isFinite(priceNum)) return;
       item.unitPrice = priceNum;
       let discount = getWholesaleDiscount(item.quantity);
       let baseUnitCost = getBudgetItemBaseCost(item);
@@ -2175,10 +2213,7 @@
       item.baseMarkup = baseUnitCost > 0
         ? item.baseUnitPrice / baseUnitCost
         : item.baseMarkup;
-      item.effectiveMarkup = baseUnitCost > 0
-        ? priceNum / baseUnitCost
-        : 1;
-      item.total = priceNum * item.quantity;
+      applyWholesalePricing(item, item.quantity);
       renderBudgetTable(false); // Update totals without losing active edit focus
     }
   }
@@ -2191,17 +2226,12 @@
 
       let baseUnitCost = getBudgetItemBaseCost(item);
       let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
-      let discount = getWholesaleDiscount(item.quantity);
 
       item.baseUnitCost = baseUnitCost;
       item.unitExtrasCost = unitExtrasCost;
       item.baseUnitPrice = roundMoneyValue(baseUnitCost * markupNum);
-      item.unitPrice = roundMoneyValue(item.baseUnitPrice * (1 - discount));
       item.baseMarkup = markupNum;
-      item.effectiveMarkup = baseUnitCost > 0
-        ? item.unitPrice / baseUnitCost
-        : 1;
-      item.total = item.unitPrice * item.quantity;
+      applyWholesalePricing(item, item.quantity);
       renderBudgetTable(false); // Update totals without losing active edit focus
     }
   }
@@ -2246,7 +2276,7 @@
             <input type="number" step="1" min="1" class="edit-qty-input" value="${item.quantity}" oninput="updateBudgetItemQty(${item.id}, this.value)">
           </td>
           <td style="text-align: right;">
-            <input type="text" class="edit-price-input" value="${item.unitPrice.toFixed(2).replace('.', ',')}" oninput="updateBudgetItemPrice(${item.id}, this.value)">
+            <input type="text" class="edit-price-input" value="${fmtUnitPriceValue(item.unitPrice, item.quantity)}" oninput="updateBudgetItemPrice(${item.id}, this.value)">
           </td>
           <td style="text-align: right;">
             <input type="text" class="edit-markup-input" value="${Number.isFinite(item.effectiveMarkup) ? item.effectiveMarkup.toFixed(2).replace('.', ',') : ''}" oninput="updateBudgetItemMarkup(${item.id}, this.value)" onblur="renderBudgetTable(false)">
@@ -2266,7 +2296,7 @@
       budgetItems.forEach((item) => {
         let priceInput = document.querySelector(`[data-budget-item-id="${item.id}"] .edit-price-input`);
         if (priceInput && document.activeElement !== priceInput) {
-          priceInput.value = fmtMoneyValue(item.unitPrice);
+          priceInput.value = fmtUnitPriceValue(item.unitPrice, item.quantity);
         }
         let el = document.getElementById(`itemTotal_${item.id}`);
         if (el) {
@@ -2371,12 +2401,13 @@
     document.getElementById('clientPhone').value = '';
     document.getElementById('budgetNotes').value = '';
     document.getElementById('budgetNumberDisplay').innerText = getNextQuoteNumber();
-    ['projectName', 'quantity', 'weight', 'printTime', 'filamentCost', 'packagingCost', 'extraCost', 'markup']
+    ['projectName', 'quantity', 'weight', 'printTime', 'filamentCost', 'packagingCost', 'extraCost']
       .forEach(id => document.getElementById(id).value = '');
     document.getElementById('materialType').value = '';
-    document.getElementById('riskRate').value = '0';
+    document.getElementById('markup').value = '2.0';
+    document.getElementById('riskRate').value = '15';
     document.getElementById('profitAwarenessCheckbox').checked = false;
-    updateRiskText(0);
+    updateRiskText(15);
     calculate();
     renderBudgetTable();
   }
