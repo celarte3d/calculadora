@@ -1558,7 +1558,7 @@
               <div class="val" id="valRisco">R$ 0,00</div>
             </div>
             <div class="table-row final-cost">
-              <div class="name" style="color: #FFFFFF;">CUSTO FINAL UNITÁRIO</div>
+              <div class="name" style="color: #FFFFFF;">CUSTO DE PRODUÇÃO UNITÁRIO</div>
               <div class="val" style="color: var(--brand-cyan);" id="valCustoFinal">R$ 0,00</div>
             </div>
           </div>
@@ -1975,14 +1975,15 @@
     let costRisk = baseRiskCost * riskPct;
 
     let markupCost = roundMoneyValue(baseRiskCost + costRisk);
-    let unitCostTotal = roundMoneyValue(markupCost + costExtras);
+    let unitCostTotal = markupCost;
     let projectTotalCost = unitCostTotal * qty;
     if (preserveProjectTotal && projectTotalOverride !== null && markupCost > 0) {
       markup = (projectTotalOverride / qty - costExtras) / markupCost;
       document.getElementById('markup').value = markup.toFixed(2).replace('.', ',');
     }
 
-    let unitSellingPrice = roundMoneyValue(markupCost * markup) + costExtras;
+    let baseUnitSellingPrice = roundMoneyValue(markupCost * markup);
+    let unitSellingPrice = baseUnitSellingPrice + costExtras;
     let unitProfit = unitSellingPrice - unitCostTotal;
 
     currentUnitSellingPrice = unitSellingPrice;
@@ -2035,7 +2036,7 @@
     document.getElementById('barLucroTxt').innerText = fmtR$(unitProfit) + ' (' + pctProfit.toFixed(1) + '%)';
 
     // Calculate Real Profit Percentage over Cost
-    let realProfitPct = markupCost > 0 ? (unitProfit / markupCost) * 100 : 0;
+    let realProfitPct = markupCost > 0 ? ((baseUnitSellingPrice - markupCost) / markupCost) * 100 : 0;
     document.getElementById('realProfitValue').innerText = realProfitPct.toFixed(1) + '%';
 
     // Fill bar width (0% to 200%+ profit mapped to 0% to 100% track width)
@@ -2060,9 +2061,9 @@
 
   // Add Item to Budget
   function addToBudget() {
-    let productionCost = currentUnitCostTotal - currentUnitExtrasCost;
+    let productionCost = currentUnitCostTotal;
     let realProfitPct = productionCost > 0
-      ? ((currentUnitSellingPrice - currentUnitCostTotal) / productionCost) * 100
+      ? ((currentUnitSellingPrice - currentUnitExtrasCost - productionCost) / productionCost) * 100
       : 0;
 
     if (realProfitPct < 100) {
@@ -2078,7 +2079,7 @@
     let qty = parseVal('quantity') || 1;
     let unitPrice = currentUnitSellingPrice;
     let unitExtrasCost = currentUnitExtrasCost;
-    let markupCost = currentUnitCostTotal - unitExtrasCost;
+    let markupCost = currentUnitCostTotal;
     let baseMarkupPrice = unitPrice - unitExtrasCost;
     let effectiveMarkup = markupCost > 0
       ? baseMarkupPrice / markupCost
@@ -2093,7 +2094,7 @@
       total: total,
       baseUnitPrice: baseMarkupPrice,
       baseMarkup: effectiveMarkup,
-      baseUnitCost: currentUnitCostTotal,
+      baseUnitCost: currentUnitCostTotal + unitExtrasCost,
       unitExtrasCost: unitExtrasCost,
       unitExtrasExcludedFromMarkup: true,
       effectiveMarkup: effectiveMarkup,
