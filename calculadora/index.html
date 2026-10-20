@@ -1974,14 +1974,15 @@
     let baseRiskCost = costFilament + costEnergy + costDepreciation;
     let costRisk = baseRiskCost * riskPct;
 
-    let unitCostTotal = roundMoneyValue(baseRiskCost + costExtras + costRisk);
+    let markupCost = roundMoneyValue(baseRiskCost + costRisk);
+    let unitCostTotal = roundMoneyValue(markupCost + costExtras);
     let projectTotalCost = unitCostTotal * qty;
-    if (preserveProjectTotal && projectTotalOverride !== null && unitCostTotal > 0) {
-      markup = projectTotalOverride / qty / unitCostTotal;
+    if (preserveProjectTotal && projectTotalOverride !== null && markupCost > 0) {
+      markup = (projectTotalOverride / qty - costExtras) / markupCost;
       document.getElementById('markup').value = markup.toFixed(2).replace('.', ',');
     }
 
-    let unitSellingPrice = roundMoneyValue(unitCostTotal * markup);
+    let unitSellingPrice = roundMoneyValue(markupCost * markup) + costExtras;
     let unitProfit = unitSellingPrice - unitCostTotal;
 
     currentUnitSellingPrice = unitSellingPrice;
@@ -2034,7 +2035,7 @@
     document.getElementById('barLucroTxt').innerText = fmtR$(unitProfit) + ' (' + pctProfit.toFixed(1) + '%)';
 
     // Calculate Real Profit Percentage over Cost
-    let realProfitPct = (markup - 1) * 100;
+    let realProfitPct = unitCostTotal > 0 ? (unitProfit / unitCostTotal) * 100 : 0;
     document.getElementById('realProfitValue').innerText = realProfitPct.toFixed(1) + '%';
 
     // Fill bar width (0% to 200%+ profit mapped to 0% to 100% track width)
@@ -2059,8 +2060,9 @@
 
   // Add Item to Budget
   function addToBudget() {
-    let markup = parseVal('markup') || 1;
-    let realProfitPct = (markup - 1) * 100;
+    let realProfitPct = currentUnitCostTotal > 0
+      ? ((currentUnitSellingPrice - currentUnitCostTotal) / currentUnitCostTotal) * 100
+      : 0;
 
     if (realProfitPct < 100) {
       let isAware = document.getElementById('profitAwarenessCheckbox').checked;
@@ -2074,8 +2076,11 @@
     let name = document.getElementById('projectName').value.trim() || 'Item 3D';
     let qty = parseVal('quantity') || 1;
     let unitPrice = currentUnitSellingPrice;
-    let effectiveMarkup = currentUnitCostTotal > 0
-      ? unitPrice / currentUnitCostTotal
+    let unitExtrasCost = currentUnitExtrasCost;
+    let markupCost = currentUnitCostTotal - unitExtrasCost;
+    let baseMarkupPrice = unitPrice - unitExtrasCost;
+    let effectiveMarkup = markupCost > 0
+      ? baseMarkupPrice / markupCost
       : 1;
     let total = unitPrice * qty;
 
@@ -2085,10 +2090,11 @@
       quantity: qty,
       unitPrice: unitPrice,
       total: total,
-      baseUnitPrice: unitPrice,
+      baseUnitPrice: baseMarkupPrice,
       baseMarkup: effectiveMarkup,
       baseUnitCost: currentUnitCostTotal,
-      unitExtrasCost: currentUnitExtrasCost,
+      unitExtrasCost: unitExtrasCost,
+      unitExtrasExcludedFromMarkup: true,
       effectiveMarkup: effectiveMarkup,
       date: getTodayDateString()
     };
@@ -2168,11 +2174,19 @@
     item.baseMarkup = baseMarkup;
     item.baseUnitCost = baseUnitCost;
     item.unitExtrasCost = unitExtrasCost;
-    item.unitPrice = pricing.unitPrice;
-    item.effectiveMarkup = baseUnitCost > 0
-      ? item.unitPrice / baseUnitCost
-      : 1;
-    item.total = pricing.total;
+    if (item.unitExtrasExcludedFromMarkup) {
+      item.unitPrice = pricing.unitPrice + unitExtrasCost;
+      item.effectiveMarkup = baseUnitCost > unitExtrasCost
+        ? pricing.unitPrice / (baseUnitCost - unitExtrasCost)
+        : 1;
+      item.total = roundMoneyValue(item.unitPrice * quantity);
+    } else {
+      item.unitPrice = pricing.unitPrice;
+      item.effectiveMarkup = baseUnitCost > 0
+        ? item.unitPrice / baseUnitCost
+        : 1;
+      item.total = pricing.total;
+    }
   }
 
   function updateBudgetItemDesc(id, newDesc) {
@@ -2207,11 +2221,14 @@
       let discount = getWholesaleDiscount(item.quantity);
       let baseUnitCost = getBudgetItemBaseCost(item);
       let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
-      item.baseUnitPrice = discount < 1 ? priceNum / (1 - discount) : priceNum;
+      item.baseUnitPrice = discount < 1
+        ? (priceNum - unitExtrasCost) / (1 - discount)
+        : priceNum - unitExtrasCost;
       item.baseUnitCost = baseUnitCost;
       item.unitExtrasCost = unitExtrasCost;
-      item.baseMarkup = baseUnitCost > 0
-        ? item.baseUnitPrice / baseUnitCost
+      item.unitExtrasExcludedFromMarkup = true;
+      item.baseMarkup = baseUnitCost > unitExtrasCost
+        ? item.baseUnitPrice / (baseUnitCost - unitExtrasCost)
         : item.baseMarkup;
       applyWholesalePricing(item, item.quantity);
       renderBudgetTable(false); // Update totals without losing active edit focus
@@ -2229,7 +2246,8 @@
 
       item.baseUnitCost = baseUnitCost;
       item.unitExtrasCost = unitExtrasCost;
-      item.baseUnitPrice = roundMoneyValue(baseUnitCost * markupNum);
+      item.unitExtrasExcludedFromMarkup = true;
+      item.baseUnitPrice = roundMoneyValue((baseUnitCost - unitExtrasCost) * markupNum);
       item.baseMarkup = markupNum;
       applyWholesalePricing(item, item.quantity);
       renderBudgetTable(false); // Update totals without losing active edit focus
@@ -2457,8 +2475,11 @@
       budgetItems = target.items || [];
       budgetItems.forEach(item => {
         let baseUnitCost = getBudgetItemBaseCost(item);
+        let unitExtrasCost = Number.isFinite(item.unitExtrasCost) ? item.unitExtrasCost : 0;
         item.baseUnitCost = baseUnitCost;
-        item.effectiveMarkup = baseUnitCost > 0 ? item.unitPrice / baseUnitCost : 1;
+        item.effectiveMarkup = item.unitExtrasExcludedFromMarkup && baseUnitCost > unitExtrasCost
+          ? (item.unitPrice - unitExtrasCost) / (baseUnitCost - unitExtrasCost)
+          : baseUnitCost > 0 ? item.unitPrice / baseUnitCost : 1;
       });
       budgetTotalOverride = typeof target.totalOverride === 'number' ? target.totalOverride : null;
       renderBudgetTable();
