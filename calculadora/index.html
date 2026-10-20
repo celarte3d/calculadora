@@ -2035,7 +2035,7 @@
     document.getElementById('barLucroTxt').innerText = fmtR$(unitProfit) + ' (' + pctProfit.toFixed(1) + '%)';
 
     // Calculate Real Profit Percentage over Cost
-    let realProfitPct = unitCostTotal > 0 ? (unitProfit / unitCostTotal) * 100 : 0;
+    let realProfitPct = markupCost > 0 ? (unitProfit / markupCost) * 100 : 0;
     document.getElementById('realProfitValue').innerText = realProfitPct.toFixed(1) + '%';
 
     // Fill bar width (0% to 200%+ profit mapped to 0% to 100% track width)
@@ -2060,8 +2060,9 @@
 
   // Add Item to Budget
   function addToBudget() {
-    let realProfitPct = currentUnitCostTotal > 0
-      ? ((currentUnitSellingPrice - currentUnitCostTotal) / currentUnitCostTotal) * 100
+    let productionCost = currentUnitCostTotal - currentUnitExtrasCost;
+    let realProfitPct = productionCost > 0
+      ? ((currentUnitSellingPrice - currentUnitCostTotal) / productionCost) * 100
       : 0;
 
     if (realProfitPct < 100) {
